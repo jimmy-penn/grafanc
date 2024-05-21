@@ -21,7 +21,7 @@ SRC = Util.cpp AncestrySnps.cpp VcfSampleAncestrySnpGeno.cpp FamFileSamples.cpp 
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-grafpop: $(OBJ)
+grafanc: $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJ)
 
 Util.o: $(HDIR)Util.h
