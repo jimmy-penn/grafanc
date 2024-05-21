@@ -207,6 +207,16 @@ vector<string> SplitString(const string& str, const string& delim)
     return tokens;
 }
 
+string TrimString(const string &str) 
+{
+    string newStr = str;
+
+    newStr.erase(0, newStr.find_first_not_of("\t\n\v\f\r "));
+    newStr.erase(newStr.find_last_not_of("\t\n\v\f\r ") + 1);
+
+    return newStr;
+}
+
 void ShowTimeDiff(const struct timeval &t1, const struct timeval &t2)
 {
     int usec = t2.tv_usec - t1.tv_usec;

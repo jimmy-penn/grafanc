@@ -1,4 +1,5 @@
 #include "AncestrySnps.h"
+#include <fstream>
 
 AncestrySnp::AncestrySnp(int id, int rsNum, int ch, int g37, int g38, char a1, char a2, float* refPops, float *vtxPops)
 {
@@ -14,17 +15,47 @@ AncestrySnp::AncestrySnp(int id, int rsNum, int ch, int g37, int g38, char a1, c
     for (int i = 0; i < numVtxPops; i++) vtxPopAfs[i] = vtxPops[i];
 }
 
+void AncestrySnp::SetRefSubPopAfs (float* popAfs)
+{
+    // By default, AFs for normalization is the same as reference AFs
+    for (int i = 0; i < numSubPops; i++) {
+        refSubPopAfs[i] = popAfs[i];
+        nomSubPopAfs[i] = popAfs[i];
+    }
+}
+
+void AncestrySnp::SetNomSubPopAf (int popId, float popAf)
+{
+    // When needed, AF for normalization can be set to different value then ref AF
+    nomSubPopAfs[popId] = popAf;
+}
+
 AncestrySnps::AncestrySnps()
 {
+  
+  refPopNames[0] = "African";
+  refPopNames[1] = "European";
+  refPopNames[2] = "Asian";
+  refPopNames[3] = "Mexican";
+  refPopNames[4] = "Indian-Pakistani";
+  
+  string subPopNames[numSubPops];
 
-    refPopNames[0] = "African";
-    refPopNames[1] = "European";
-    refPopNames[2] = "Asian";
-    refPopNames[3] = "Mexican";
-    refPopNames[4] = "Indian-Pakistani";
+  subPopNames[0] = "chn"; // Chinease, especially Northern Chinese
+  subPopNames[1] = "jpn"; // Japanese
+  subPopNames[2] = "sea"; // Southeast Asian: Thai, Vietnamese, ...
+  subPopNames[3] = "ceu"; // English, Irish, ...
+  subPopNames[4] = "seu"; // South European: Italian, ...
+  subPopNames[5] = "fin"; // Finnish
 
-    snps = {};
+  for (int popId = 0; popId < numSubPops; popId++) {
+      refSubPopNames[popId] = "ref_" + subPopNames[popId];
+      nomSubPopNames[popId] = "nom_" + subPopNames[popId];
+  }
+
+  snps = {};
 }
+
 
 AncestrySnps::~AncestrySnps()
 {
@@ -57,7 +88,7 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
     int lineNo = 0;
     bool fileIsValid = true;
 
-    int numSnps = 0;
+    int snpId = 0;
     int rsNum, chr, g37, g38;
     char a1, a2;
     float rfEur, rfAfa, rfAsn, rfLat, rfSas, vtEur, vtAfr, vtEas;
@@ -85,16 +116,16 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
             vtxPopAfs[1] = vtAfr;
             vtxPopAfs[2] = vtEas;
 
-            AncestrySnp ancSnp(numSnps, rsNum, chr, g37, g38, a1, a2, refPopAfs, vtxPopAfs);
+            AncestrySnp ancSnp(snpId, rsNum, chr, g37, g38, a1, a2, refPopAfs, vtxPopAfs);
 
             snps.push_back(ancSnp);
 
             long int chrPos37 = (long)chr * 1000000000 + g37;
             long int chrPos38 = (long)chr * 1000000000 + g38;
 
-            rsToAncSnpId[rsNum] = numSnps;
-            pos37ToAncSnpId[chrPos37] = numSnps;
-            pos38ToAncSnpId[chrPos38] = numSnps;
+            rsToAncSnpId[rsNum] = snpId;
+            pos37ToAncSnpId[chrPos37] = snpId;
+            pos38ToAncSnpId[chrPos38] = snpId;
 
             double pev = refPopAfs[0];
             double pfv = refPopAfs[1];
@@ -124,9 +155,9 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
                 double fGd = aaPfv * pv * pv + bbPfv * qv * qv + abPfv * 2 * pv * qv;
                 double aGd = aaPav * pv * pv + bbPav * qv * qv + abPav * 2 * pv * qv;
 
-                vtxExpGenoDists[vtxId][0][numSnps] = eGd;
-                vtxExpGenoDists[vtxId][1][numSnps] = fGd;
-                vtxExpGenoDists[vtxId][2][numSnps] = aGd;
+                vtxExpGenoDists[vtxId][0][snpId] = eGd;
+                vtxExpGenoDists[vtxId][1][snpId] = fGd;
+                vtxExpGenoDists[vtxId][2][snpId] = aGd;
 
                 popExpPeSums[vtxId] += eGd;
                 popExpPfSums[vtxId] += fGd;
@@ -136,22 +167,22 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
             delete refPopAfs;
             delete vtxPopAfs;
 
-            numSnps++;
+            snpId++;
         }
 
         lineNo++;
     }
     fclose(ifp);
 
-    ASSERT(numSnps == numAncSnps, "numSnps = " << numAncSnps << ".\n");
+    ASSERT(snpId == numAllAncSnps, "snpId = " << numAllAncSnps << ".\n");
 
     for (int vtxId = 0; vtxId < 3; vtxId++) {
-        vtxPopExpGds[vtxId].e = -1 * popExpPeSums[vtxId]/numSnps;
-        vtxPopExpGds[vtxId].f = -1 * popExpPfSums[vtxId]/numSnps;
-        vtxPopExpGds[vtxId].a = -1 * popExpPaSums[vtxId]/numSnps;
+        vtxPopExpGds[vtxId].e = -1 * popExpPeSums[vtxId]/snpId;
+        vtxPopExpGds[vtxId].f = -1 * popExpPfSums[vtxId]/snpId;
+        vtxPopExpGds[vtxId].a = -1 * popExpPaSums[vtxId]/snpId;
     }
 
-    cout << "Read " << numSnps << " ancestry SNPs from file " << ancSnpFile << "\n\n";
+    cout << "Read " << snpId << " ancestry SNPs from file " << ancSnpFile << "\n\n";
     if (0) {
         cout << "Expected vertex genetic distances\n";
         for (int vtxId = 0; vtxId < 3; vtxId++) {
@@ -161,6 +192,167 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
             cout << "\t\tEAS: " << vtxPopExpGds[vtxId].a << "\n";
         }
     }
+    
+    return snpId;
+}
+
+int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
+{
+    ASSERT(FileExists(refPopFile.c_str()), "File " << refPopFile << " does not exist!\n");
+
+    cout << "Reading AFs from file " << refPopFile << "\n";  
+    
+    int snpId = 0;
+    
+    FILE* fp = fopen(refPopFile.c_str(), "r");
+    if (fp == NULL) exit(EXIT_FAILURE);
+    
+    char* line = NULL;
+    size_t len = 0;
+    const string delim = "\t";
+
+    // Make sure the file has correct columns
+    bool isRightFile = true;
+    if ((getline(&line, &len, fp)) != -1) {
+        const string header(line);
+        vector<string> vars = SplitString(header, delim);
+        int numVars = vars.size();
+
+        if (numVars <= numSubPops) {
+            isRightFile = false;
+        }
+        else if (vars[0] != "rs") {
+            isRightFile = false;
+        }
+        else {
+            for (int i = 0; i < numSubPops; i++) {
+                string var = TrimString(vars[i+1]);
+
+                if (var != refSubPopNames[i]) {
+                    isRightFile = false;
+                    break;
+                }
+            }
+        }
+    }
+    
+    ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (rs, ref_chn, ...)!\n");
+    
+    while ((getline(&line, &len, fp)) != -1) {
+        ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
+      
+        vector<string> vals = SplitString(string(line), delim);
+        int rs = stoi(vals[0]); 
+        ASSERT(rs == snps[snpId].rs, "ERROR in " << refPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
+        
+        float popAfs[numSubPops];
+        for (int i = 0; i < numSubPops; i++) popAfs[i] = stof(vals[i+1]);
+        snps[snpId].SetRefSubPopAfs(popAfs);
+        
+        snpId++;
+    }
+    fclose(fp);
+    
+    if (line) free(line);
+
+    for (int i = 0; i < 10; i++) {
+        printf("No. %2d: rs: %8d AFs: %5.4f %5.4f %5.4f NAFs: %5.4f %5.4f %5.4f\n", i, snps[i].rs, 
+               snps[i].refSubPopAfs[0], snps[i].refSubPopAfs[2], snps[i].refSubPopAfs[4],
+               snps[i].nomSubPopAfs[0], snps[i].nomSubPopAfs[2], snps[i].nomSubPopAfs[4]
+        );
+    }    
+    
+    return snpId;
+}
+
+int AncestrySnps::ReadNomSubPopSnpsFromFile(string nomPopFile)
+{
+    ASSERT(FileExists(nomPopFile.c_str()), "File " << nomPopFile << " does not exist!\n");
+    
+    cout << "Reading AFs for normalization from file " << nomPopFile << "\n";  
+    
+    int snpId = 0;
+    
+    FILE* fp = fopen(nomPopFile.c_str(), "r");
+    if (fp == NULL) exit(EXIT_FAILURE);
+    
+    char* line = NULL;
+    size_t len = 0;
+    const string delim = "\t";
+    
+    // Find columns corresponding to each ref population
+    int nomPopColIds[numSubPops];
+    for (int i = 0; i < numSubPops; i++) nomPopColIds[i] = 0;
+
+    bool isRightFile = true;
+    vector<string> vars;
+    int numVars = 0;
+    
+    if ((getline(&line, &len, fp)) != -1) {
+        const string header(line);
+        vars = SplitString(header, delim);
+        numVars = vars.size();
+        
+        if (numVars < 2) {
+            isRightFile = false;
+        }
+        else if (vars[0] != "rs") {
+            isRightFile = false;
+        }
+    }
+
+    ASSERT(isRightFile, "File " << nomPopFile << " does not have expected columns (rs, ...)!\n");
+    
+    int numPopsInFile = 0;
+    
+    for (int i = 0; i < numSubPops; i++) {
+        string expVar = nomSubPopNames[i];      
+        for (int col = 1; col < numVars; col++) {
+            string var = TrimString(vars[col]);
+
+            if (var == expVar) {
+                nomPopColIds[i] = col;
+                numPopsInFile++;
+                break;
+            }
+        }
+    }        
+
+    if (numPopsInFile < 1) {
+        cout << "ERROR: no reference populations are found in " << nomPopFile << "\n";
+    }
+    else {
+        while ((getline(&line, &len, fp)) != -1) {
+            ASSERT(snpId < numAllAncSnps, "File " << nomPopFile << " has too many rows!\n");
+            
+            vector<string> vals = SplitString(string(line), delim);
+            int rs = stoi(vals[0]); 
+            ASSERT(rs == snps[snpId].rs, "ERROR in " << nomPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
+
+            for (int i = 0; i < numSubPops; i++) {
+                int col = nomPopColIds[i];
+
+                if (col > 0) {
+                    float af = stof(vals[col]);
+                    snps[snpId].SetNomSubPopAf(i, af);
+                }
+            }
+            
+            snpId++;
+        }
+    }
+    
+    fclose(fp);
+    
+    if (line) free(line);
+    
+    for (int i = 0; i < 10; i++) {
+        printf("No. %2d: rs: %8d AFs: %5.4f %5.4f %5.4f NAFs: %5.4f %5.4f %5.4f\n", i, snps[i].rs, 
+               snps[i].refSubPopAfs[0], snps[i].refSubPopAfs[3], snps[i].refSubPopAfs[5],
+               snps[i].nomSubPopAfs[0], snps[i].nomSubPopAfs[3], snps[i].nomSubPopAfs[5]);
+    }    
+    
+    return snpId;
 }
 
 int AncestrySnps::FindSnpIdGivenRs(int rsNum)
@@ -234,3 +426,4 @@ void AncestrySnps::ShowAncestrySnps()
         }
     }
 }
+

@@ -23,7 +23,8 @@
 #include <map>
 #include <vector>
 #include <unistd.h>
-
+#include <fstream>
+  
 const double pi = 3.1415926;
 
 using namespace std;
@@ -68,6 +69,7 @@ int GetRsNumFromString(const char*);
 void ShowTimeDiff(const struct timeval&, const struct timeval&);
 char FlipAllele(char);
 vector<string> SplitString(const string&, const string&);
+string TrimString(const string &str); 
 string LowerString(const string&);
 string UpperString(const string&);
 GenoDatasetType CheckGenoDataFile(const string&, string*);

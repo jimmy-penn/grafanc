@@ -3,9 +3,10 @@
 
 #include "Util.h"
 
-static const int numAncSnps = 100437;
+static const int numAllAncSnps = 100437;
 static const int numRefPops = 5;
 static const int numVtxPops = 3;
+static const int numSubPops = 6;
 
 class AncestrySnp
 {
@@ -17,11 +18,16 @@ public:
     int posG38;
     char ref;
     char alt;
-    float vtxPopAfs[numVtxPops]; // E, F, A, or EUR, AFR, EAS
-    float refPopAfs[numRefPops]; // EUR, AFA, ASN, LAT, SAS
-
+    float vtxPopAfs[numVtxPops];    // E, F, A, or EUR, AFR, EAS
+    float refPopAfs[numRefPops];    // EUR, AFA, ASN, LAT, SAS
+    float refSubPopAfs[numSubPops]; // Other reference subcontinental populations
+    float nomSubPopAfs[numSubPops]; // Smaller groups used for normalization
+    
 public:
     AncestrySnp(int, int, int, int, int, char, char, float*, float*);
+  
+    void SetRefSubPopAfs(float*);
+    void SetNomSubPopAf(int, float);
 };
 
 class AncestrySnps
@@ -35,13 +41,17 @@ public:
     ~AncestrySnps();
     vector<AncestrySnp> snps;
     // For each SNP, keeps the expected genetic distance from the 3 vertices to the 3 ref population
-    double vtxExpGenoDists[numVtxPops][numVtxPops][numAncSnps];
+    double vtxExpGenoDists[numVtxPops][numVtxPops][numAllAncSnps];
     // Vertex genetic distances summed up using all ancestry SNPs
     GenoDist vtxPopExpGds[numVtxPops];
 
     string refPopNames[numRefPops];
-
+    string refSubPopNames[numSubPops];
+    string nomSubPopNames[numSubPops];
+    
     int ReadAncestrySnpsFromFile(string);
+    int ReadRefSubPopSnpsFromFile(string);
+    int ReadNomSubPopSnpsFromFile(string);
     int FindSnpIdGivenRs(int);
     int FindSnpIdGivenChrPos(int, int, int);
     AncestrySnp GetAncestrySnp(int);
