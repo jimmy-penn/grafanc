@@ -4,7 +4,7 @@ SampleGenoAncestry *smpGenoAnc = NULL;
 
 int main(int argc, char* argv[])
 {
-    string usage = "Usage: grafpop <Binary PLINK set or VCF file> <output file>\n";
+    string usage = "Usage: grafanc <Binary PLINK set or VCF file> <output file>\n";
 
     string disclaimer =
     "\n *==========================================================================="
@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
     "\n *===========================================================================";
 
     if (argc < 3) {
-        cout << disclaimer << "\n\n";
         cout << usage << "\n";
         exit(0);
     }
@@ -66,13 +65,25 @@ int main(int argc, char* argv[])
 
     string ancSnpFile = FindFile("AncInferSNPs.txt");
     if (ancSnpFile == "") {
-        cout << "\nERROR: didn't find file AncInferSNPs.txt. Please put the file under 'data' directory.\n\n";
+        cout << "ERROR: didn't find file AncInferSNPs.txt. Please put the file under 'data' directory.\n\n";
         return 0;
     }
-    AncestrySnps *ancSnps = new AncestrySnps();
-    ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
-    //ancSnps->ShowAncestrySnps();
 
+    string refSubPopFile = "../../testdata/RefSubPopSNPs.txt";
+    string nomSubPopFile = "../../testdata/NomSubPopSNPs.txt";
+    
+    AncestrySnps *ancSnps = new AncestrySnps();
+    int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
+    cout << "Read " << numSnpsInAncFile << " SNPs from " << ancSnpFile << "\n";     
+    
+    int numSnpsInRefPopFile = ancSnps->ReadRefSubPopSnpsFromFile(refSubPopFile);
+    cout << "Read " << numSnpsInRefPopFile << " SNPs from " << refSubPopFile << "\n"; 
+    
+    if (FileExists(nomSubPopFile.c_str())) {
+        int numSnpsInNomPopFile = ancSnps->ReadNomSubPopSnpsFromFile(nomSubPopFile);
+        cout << "Read " << numSnpsInNomPopFile << " SNPs from " << nomSubPopFile << "\n"; 
+    }
+    
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
 
@@ -81,6 +92,9 @@ int main(int argc, char* argv[])
 
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 
+    smpGenoAnc->CalculateSubPopGd0Values();
+    smpGenoAnc->CalculateGd4V0Scores();
+    
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
         VcfSampleAncestrySnpGeno *vcfGeno = new VcfSampleAncestrySnpGeno(genoDs, ancSnps);
         bool dataRead = vcfGeno->ReadDataFromFile();

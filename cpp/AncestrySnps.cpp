@@ -44,10 +44,12 @@ AncestrySnps::AncestrySnps()
   subPopNames[0] = "chn"; // Chinease, especially Northern Chinese
   subPopNames[1] = "jpn"; // Japanese
   subPopNames[2] = "sea"; // Southeast Asian: Thai, Vietnamese, ...
-  subPopNames[3] = "ceu"; // English, Irish, ...
-  subPopNames[4] = "seu"; // South European: Italian, ...
-  subPopNames[5] = "fin"; // Finnish
-
+  subPopNames[3] = "pac"; // Pacific Islander
+  subPopNames[4] = "ceu"; // English, Irish, ...
+  subPopNames[5] = "seu"; // South European: Italian, ...
+  subPopNames[6] = "fin"; // Finnish
+  subPopNames[7] = "lt1"; // Lating American 1
+  
   for (int popId = 0; popId < numSubPops; popId++) {
       refSubPopNames[popId] = "ref_" + subPopNames[popId];
       nomSubPopNames[popId] = "nom_" + subPopNames[popId];
@@ -235,8 +237,13 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
             }
         }
     }
+
+    string expCols = "rs";
+    for (int i = 0; i < numSubPops; i++) {
+        expCols += ", " + refSubPopNames[i];
+    }
     
-    ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (rs, ref_chn, ...)!\n");
+    ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (" << expCols << ")!\n");
     
     while ((getline(&line, &len, fp)) != -1) {
         ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
@@ -255,13 +262,6 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
     
     if (line) free(line);
 
-    for (int i = 0; i < 10; i++) {
-        printf("No. %2d: rs: %8d AFs: %5.4f %5.4f %5.4f NAFs: %5.4f %5.4f %5.4f\n", i, snps[i].rs, 
-               snps[i].refSubPopAfs[0], snps[i].refSubPopAfs[2], snps[i].refSubPopAfs[4],
-               snps[i].nomSubPopAfs[0], snps[i].nomSubPopAfs[2], snps[i].nomSubPopAfs[4]
-        );
-    }    
-    
     return snpId;
 }
 
@@ -345,13 +345,7 @@ int AncestrySnps::ReadNomSubPopSnpsFromFile(string nomPopFile)
     fclose(fp);
     
     if (line) free(line);
-    
-    for (int i = 0; i < 10; i++) {
-        printf("No. %2d: rs: %8d AFs: %5.4f %5.4f %5.4f NAFs: %5.4f %5.4f %5.4f\n", i, snps[i].rs, 
-               snps[i].refSubPopAfs[0], snps[i].refSubPopAfs[3], snps[i].refSubPopAfs[5],
-               snps[i].nomSubPopAfs[0], snps[i].nomSubPopAfs[3], snps[i].nomSubPopAfs[5]);
-    }    
-    
+
     return snpId;
 }
 

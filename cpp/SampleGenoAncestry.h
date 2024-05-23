@@ -7,6 +7,8 @@
 #include "FamFileSamples.h"
 #include "SampleGenoDist.h"
 
+static const int numSubPopScores = 6;
+
 class GenoSample
 {
 public:
@@ -20,10 +22,12 @@ public:
     bool ancIsSet;
     float gd1, gd2, gd3, gd4;
     float ePct, fPct, aPct;   // Ancestry (EUR, AFR, EAS) components of the sample
+    float subPopScores[numSubPopScores];
 
 public:
     GenoSample(string);
     void SetAncestryScores(int, float, float, float, float, float, float, float, bool);
+    void SetSubPopGdScores(float*);
 };
 
 
@@ -45,7 +49,20 @@ public:
     vector<GenoSample> samples;
     vector<int> *ancSnpIds;
     vector<char*> *ancSnpCodedGenos; // Use char, instead of int, to save space
+    const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EU1", "EU2", "EU3"};
 
+    // Pair of ref pops to use for each score    
+    // Ref pops are: chn, jpn, sea, pac, ceu, seu, fin, lt1
+    const int scorePopIdx1[numSubPopScores] = {0, 0, 2, 4, 4, 5};
+    const int scorePopIdx2[numSubPopScores] = {2, 1, 3, 5, 6, 7};
+    
+    // Expected GD scores of subpopulations when all SNPs are included
+    float subPopGd0P1[numSubPopScores];
+    float subPopGd0P2[numSubPopScores];
+    
+    // Expected GD4 scores for the two ref pops Lat1 and SAS
+    float gd4Gd0P1, gd4Gd0P2;
+    
     SampleGenoAncestry(AncestrySnps*, int=100);
     ~SampleGenoAncestry();
 
@@ -56,7 +73,9 @@ public:
     void SetSnpGenoData(vector<int>*, vector<char*>*);
     void SetNumThreads(int);
     void InitPopPvalues();
-
+    void CalculateSubPopGd0Values();
+    void CalculateGd4V0Scores();
+    
     int GetNumSamples() { return numSamples; };
     int GetNumAncSamples() { return numAncSmps; };
     bool HasEnoughAncestrySnps(int numSnps) { return numSnps >= minAncSnps; }
