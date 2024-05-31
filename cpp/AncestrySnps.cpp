@@ -33,8 +33,8 @@ void AncestrySnp::SetNomSubPopAf (int popId, float popAf)
 AncestrySnps::AncestrySnps()
 {
   
-  refPopNames[0] = "African";
-  refPopNames[1] = "European";
+  refPopNames[0] = "European";
+  refPopNames[1] = "African";
   refPopNames[2] = "Asian";
   refPopNames[3] = "Mexican";
   refPopNames[4] = "Indian-Pakistani";
@@ -48,7 +48,11 @@ AncestrySnps::AncestrySnps()
   subPopNames[4] = "ceu"; // English, Irish, ...
   subPopNames[5] = "seu"; // South European: Italian, ...
   subPopNames[6] = "fin"; // Finnish
-  subPopNames[7] = "lt1"; // Lating American 1
+  subPopNames[7] = "yri"; // YRI
+  subPopNames[8] = "esn"; // ESN
+  subPopNames[9] = "msl"; // MSL
+  subPopNames[10]= "gwd"; // GWD
+  subPopNames[11]= "lwk"; // LWK
   
   for (int popId = 0; popId < numSubPops; popId++) {
       refSubPopNames[popId] = "ref_" + subPopNames[popId];
@@ -253,7 +257,11 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
         ASSERT(rs == snps[snpId].rs, "ERROR in " << refPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
         
         float popAfs[numSubPops];
-        for (int i = 0; i < numSubPops; i++) popAfs[i] = stof(vals[i+1]);
+        for (int i = 0; i < numSubPops; i++) {
+            // TODO: Add code to make sure AF value is a number
+            popAfs[i] = stof(vals[i+1]);
+        }
+          
         snps[snpId].SetRefSubPopAfs(popAfs);
         
         snpId++;

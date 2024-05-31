@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
     if (fileType == GenoDatasetType::NOT_EXISTS) {
         cout << "\nERROR: Genotype file " << genoDs << " doesn't exist!\n\n";
-    	return 0;
+    	  return 0;
     }
     else if (fileType == GenoDatasetType::IS_PLINK_GZ) {
         cout << "\nERROR: PLINK set " << genoDs << " is zipped. Please unzip it.\n\n";
@@ -72,6 +72,9 @@ int main(int argc, char* argv[])
     string refSubPopFile = "../../testdata/RefSubPopSNPs.txt";
     string nomSubPopFile = "../../testdata/NomSubPopSNPs.txt";
     
+    if (argc > 3) refSubPopFile = argv[3];      
+    if (argc > 4) nomSubPopFile = argv[4];      
+        
     AncestrySnps *ancSnps = new AncestrySnps();
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
     cout << "Read " << numSnpsInAncFile << " SNPs from " << ancSnpFile << "\n";     

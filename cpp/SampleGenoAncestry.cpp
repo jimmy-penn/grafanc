@@ -192,6 +192,16 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
             float u1 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId1];
             float u2 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId2];
             
+            // Pops with ID 100+ are the 5 continental ref pops in the existing version
+            if (refPopId1 >= 100) {
+                p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
+                u1 = p1;
+            }
+            if (refPopId2 >= 100) {
+                p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
+                u2 = p2;
+            }
+
             // Only count those SNPs for which there are both ref and normalization pop freqs
             if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
                 // Score from only one of the two alleles is added              
@@ -374,6 +384,15 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                     
                     float u1 = ancSnps->snps[ancSnpId].nomSubPopAfs[refPopId1];
                     float u2 = ancSnps->snps[ancSnpId].nomSubPopAfs[refPopId2];
+
+                    if (refPopId1 >= 100) {
+                        p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
+                        u1 = p1;
+                    }
+                    if (refPopId2 >= 100) {
+                        p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
+                        u2 = p2;
+                    }
                     
                     // Calculate three values for each SNP locus: sample GD, and the two norm pop GDs
                     if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {

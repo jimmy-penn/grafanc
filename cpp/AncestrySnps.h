@@ -6,7 +6,7 @@
 static const int numAllAncSnps = 100437;
 static const int numRefPops = 5;
 static const int numVtxPops = 3;
-static const int numSubPops = 8;
+static const int numSubPops = 12;
 
 class AncestrySnp
 {
