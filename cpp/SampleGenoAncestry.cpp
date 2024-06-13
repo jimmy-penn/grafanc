@@ -165,65 +165,6 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
     return numSaveSmps;
 }
 
-void SampleGenoAncestry::CalculateSubPopGd0Values()
-{
-    double gdScoreSumP1[numSubPopScores];
-    double gdScoreSumP2[numSubPopScores];
-    int numScoreSnps[numSubPopScores];
-
-    for (int i = 0; i < numSubPopScores; i++) {
-        gdScoreSumP1[i] = 0;
-        gdScoreSumP2[i] = 0;
-        numScoreSnps[i] = 0;
-    }
-
-    cout << "Num SNPs" << numAllAncSnps << "\n";
-    
-    for (int snpNo = 0; snpNo < numAllAncSnps; snpNo++) {
-        if (debug && snpNo % 50000 == 0) cout << "SNP No " << snpNo << "\n";
-        
-        for (int i = 0; i < numSubPopScores; i++) {
-            int refPopId1 = scorePopIdx1[i];
-            int refPopId2 = scorePopIdx2[i];
-            
-            float p1 = ancSnps->snps[snpNo].refSubPopAfs[refPopId1];
-            float p2 = ancSnps->snps[snpNo].refSubPopAfs[refPopId2];
-  
-            float u1 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId1];
-            float u2 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId2];
-            
-            // Pops with ID 100+ are the 5 continental ref pops in the existing version
-            if (refPopId1 >= 100) {
-                p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
-                u1 = p1;
-            }
-            if (refPopId2 >= 100) {
-                p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
-                u2 = p2;
-            }
-
-            // Only count those SNPs for which there are both ref and normalization pop freqs
-            if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
-                // Score from only one of the two alleles is added              
-                gdScoreSumP1[i] += u1 * log(p1/p2) + (1-u1) * log((1-p1)/(1-p2));
-                gdScoreSumP2[i] += u2 * log(p1/p2) + (1-u2) * log((1-p1)/(1-p2));
-              
-                numScoreSnps[i]++;
-            }
-            
-            if (debug && snpNo % 50000 == 0)
-                printf("\tPop %d: p1 %5.4f p2 %5.4f u1 %5.4f u2 %5.4f; n = %d S1 %7.4f S2 %7.4f\n",
-                       i, p1, p2, u1, u2,  numScoreSnps[i], gdScoreSumP1[i], gdScoreSumP2[i]);
-        }
-    }
-    
-    for (int i = 0; i < numSubPopScores; i++) {
-        // Subject GD scores are calculated for two alleles on each SNP
-        subPopGd0P1[i] = -2 * gdScoreSumP1[i] / numScoreSnps[i];
-        subPopGd0P2[i] = -2 * gdScoreSumP2[i] / numScoreSnps[i];
-    }
-}
-
 void SampleGenoAncestry::CalculateGd4V0Scores()
 {
     double gd4SumP1 = 0;
@@ -436,8 +377,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             nomGdScoreP1[i]  = -1 * nomGdScoreSumP1[i] / smpGdScoreSnpNum[i];
             nomGdScoreP2[i]  = -1 * nomGdScoreSumP2[i] / smpGdScoreSnpNum[i];
             // Normalize the GD score
-            smpGdScore[i] = subPopGd0P1[i] + (subPopGd0P2[i]-subPopGd0P1[i])*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
-            smpGdScore[i] *= 100; // Scale by 100 for plotting convenience
+            smpGdScore[i] = subPopGd0P1 + (subPopGd0P2-subPopGd0P1)*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
         }
 
         // Calculate GD4

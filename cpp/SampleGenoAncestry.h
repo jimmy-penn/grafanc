@@ -57,8 +57,9 @@ public:
     const int scorePopIdx2[numSubPopScores] = {2, 1, 3, 5, 6, 103, 9, 11, 9, 11, 10, 10};
 
     // Expected GD scores of subpopulations when all SNPs are included
-    float subPopGd0P1[numSubPopScores];
-    float subPopGd0P2[numSubPopScores];
+    // Set them to -1 and 1 since the exact values don't matter. They need to be scaled anyway.
+    const float subPopGd0P1 = -1.0;
+    const float subPopGd0P2 = 1.0;
     
     // Expected GD4 scores for the two ref pops Lat1 and SAS
     float gd4Gd0P1, gd4Gd0P2;
@@ -73,7 +74,6 @@ public:
     void SetSnpGenoData(vector<int>*, vector<char*>*);
     void SetNumThreads(int);
     void InitPopPvalues();
-    void CalculateSubPopGd0Values();
     void CalculateGd4V0Scores();
     
     int GetNumSamples() { return numSamples; };
