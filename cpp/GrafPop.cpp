@@ -95,6 +95,7 @@ int main(int argc, char* argv[])
 
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 
+    smpGenoAnc->CalculateSubPopGd0Values();
     smpGenoAnc->CalculateGd4V0Scores();
     
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {

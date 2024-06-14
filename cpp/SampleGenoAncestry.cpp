@@ -1,6 +1,6 @@
 #include "SampleGenoAncestry.h"
 
-bool debug = true; /////////////////////////////////////////////// for debugging
+bool debug = false; /////////////////////////////////////////////// for debugging
 
 GenoSample::GenoSample(string smp)
 {
@@ -51,8 +51,6 @@ SampleGenoAncestry::SampleGenoAncestry(AncestrySnps *aSnps, int minSnps)
         &aSnps->vtxPopExpGds[2], &aSnps->vtxPopExpGds[0]);
     vtxExpGd0->TransformAllDists();
     vtxExpGd0->CalculateBaryCenters();
-    
-    cout << "Create GenoAnc with score 1: " << popScoreNames[1] << "\n";
 }
 
 SampleGenoAncestry::~SampleGenoAncestry()
@@ -133,6 +131,24 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
         fprintf(ifp, "%s\n", line);
         fprintf(ifp, "#\n");
 
+        fprintf(ifp, "#\n");
+        fprintf(ifp, "# Subcontinental population raw score ranges\n");
+        fprintf(ifp, "#\n");
+        
+        char spHeader[256] = "# Score";
+        char rangeStr[256]  = "# Range";
+        sprintf(spHeader, "# Score");
+        sprintf(rangeStr, "# Range");
+        
+        for (int i = 0; i < numSubPopScores; i++) {
+            sprintf(spHeader, "%s\t%5s", spHeader, popScoreNames[i].c_str());
+            sprintf(rangeStr, "%s\t%6.5f", rangeStr, subPopGd0P2[i]-subPopGd0P1[i]);
+        }
+
+        fprintf(ifp, "%s\n", spHeader);
+        fprintf(ifp, "%s\n", rangeStr);
+        fprintf(ifp, "#\n");
+        
         sprintf(line, "%s\t%s\tGD1\tGD2\tGD3\tGD4", "Sample", "#SNPs");
         for (int i = 0; i < numSubPopScores; i++) {
             sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
@@ -165,6 +181,63 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
     return numSaveSmps;
 }
 
+void SampleGenoAncestry::CalculateSubPopGd0Values()
+{
+    double gdScoreSumP1[numSubPopScores];
+    double gdScoreSumP2[numSubPopScores];
+    int numScoreSnps[numSubPopScores];
+    
+    for (int i = 0; i < numSubPopScores; i++) {
+        gdScoreSumP1[i] = 0;
+        gdScoreSumP2[i] = 0;
+        numScoreSnps[i] = 0;
+    }
+    
+    for (int snpNo = 0; snpNo < numAllAncSnps; snpNo++) {
+        if (debug && snpNo % 50000 == 0) cout << "SNP No " << snpNo << "\n";
+        
+        for (int i = 0; i < numSubPopScores; i++) {
+            int refPopId1 = scorePopIdx1[i];
+            int refPopId2 = scorePopIdx2[i];
+            
+            float p1 = ancSnps->snps[snpNo].refSubPopAfs[refPopId1];
+            float p2 = ancSnps->snps[snpNo].refSubPopAfs[refPopId2];
+            
+            float u1 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId1];
+            float u2 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId2];
+            
+            // Pops with ID 100+ are the 5 continental ref pops in the existing version
+            if (refPopId1 >= 100) {
+                p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
+                u1 = p1;
+            }
+            if (refPopId2 >= 100) {
+                p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
+                u2 = p2;
+            }
+            
+            // Only count those SNPs for which there are both ref and normalization pop freqs
+            if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
+                // Score from only one of the two alleles is added              
+                gdScoreSumP1[i] += u1 * log(p1/p2) + (1-u1) * log((1-p1)/(1-p2));
+                gdScoreSumP2[i] += u2 * log(p1/p2) + (1-u2) * log((1-p1)/(1-p2));
+                
+                numScoreSnps[i]++;
+            }
+            
+            if (debug && snpNo % 50000 == 0)
+                printf("\tPop %d: p1 %5.4f p2 %5.4f u1 %5.4f u2 %5.4f; n = %d S1 %7.4f S2 %7.4f\n",
+                       i, p1, p2, u1, u2,  numScoreSnps[i], gdScoreSumP1[i], gdScoreSumP2[i]);
+        }
+    }
+    
+    for (int i = 0; i < numSubPopScores; i++) {
+        // Subject GD scores are calculated for two alleles on each SNP
+        subPopGd0P1[i] = -2 * gdScoreSumP1[i] / numScoreSnps[i];
+        subPopGd0P2[i] = -2 * gdScoreSumP2[i] / numScoreSnps[i];
+    }
+}
+
 void SampleGenoAncestry::CalculateGd4V0Scores()
 {
     double gd4SumP1 = 0;
@@ -189,8 +262,6 @@ void SampleGenoAncestry::CalculateGd4V0Scores()
     
     gd4Gd0P1 = -2 * gd4SumP1 / numGd4Snps;
     gd4Gd0P2 = -2 * gd4SumP2 / numGd4Snps;
-    
-    cout << "gd4Gd0P1 " << gd4Gd0P1 << " gd4Gd0P2 " << gd4Gd0P2 << "\n";
 }
 
 void SampleGenoAncestry::SetAncestryPvalues(int thNo)
@@ -377,7 +448,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             nomGdScoreP1[i]  = -1 * nomGdScoreSumP1[i] / smpGdScoreSnpNum[i];
             nomGdScoreP2[i]  = -1 * nomGdScoreSumP2[i] / smpGdScoreSnpNum[i];
             // Normalize the GD score
-            smpGdScore[i] = subPopGd0P1 + (subPopGd0P2-subPopGd0P1)*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
+            smpGdScore[i] = subPopGdNormP1 + (subPopGdNormP2-subPopGdNormP1)*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
         }
 
         // Calculate GD4
@@ -386,7 +457,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         float nomGd4P2 = -1 * nomGd4SumP2 / numGd4Snps;
         float gd4 = gd4Gd0P1 + (gd4Gd0P2 - gd4Gd0P1) * (rawGd4 - nomGd4P1) / (nomGd4P2 - nomGd4P1);
         
-        if (thNo == 0 && smpCnt < 5) {
+        if (debug && thNo == 0 && smpCnt < 5) {
           cout << "calc gd4 with gd4Gd0P1 " << gd4Gd0P1 << " gd4Gd0P2 " << gd4Gd0P2 << " gd4 = " << gd4 << "\n";
           cout << "rgd4 " << rawGd4 << " nomGd4P1 " << nomGd4P1 << " nomGd4P2 " << nomGd4P2 << " numGd4Snps "
                << numGd4Snps << " smpGd4Sum " << smpGd4Sum << " numGenoSnps = " << numGenoSnps << "\n";
