@@ -13,14 +13,13 @@ GenoSample::GenoSample(string smp)
     ancIsSet = false;
 }
 
-void GenoSample::SetAncestryScores(int numSnps, float d1, float d2, float d3, float d4, float e, float f, float a, bool isAnc)
+void GenoSample::SetAncestryScores(int numSnps, float d1, float d2, float d3, float e, float f, float a, bool isAnc)
 {
     numAncSnps = numSnps;
     ancIsSet = isAnc;
     gd1 = d1;
     gd2 = d2;
     gd3 = d3;
-    gd4 = d4;
     ePct = e;
     fPct = f;
     aPct = a;
@@ -149,7 +148,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
         fprintf(ifp, "%s\n", rangeStr);
         fprintf(ifp, "#\n");
         
-        sprintf(line, "%s\t%s\tGD1\tGD2\tGD3\tGD4", "Sample", "#SNPs");
+        sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
         for (int i = 0; i < numSubPopScores; i++) {
             sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
         }
@@ -161,7 +160,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
             if (!smp.ancIsSet) continue;
 
             sprintf(line, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
-            sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3, smp.gd4);
+            sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
             }
@@ -208,11 +207,11 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
             
             // Pops with ID 100+ are the 5 continental ref pops in the existing version
             if (refPopId1 >= 100) {
-                p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
+                p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-100];
                 u1 = p1;
             }
             if (refPopId2 >= 100) {
-                p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
+                p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-100];
                 u2 = p2;
             }
             
@@ -236,32 +235,6 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
         subPopGd0P1[i] = -2 * gdScoreSumP1[i] / numScoreSnps[i];
         subPopGd0P2[i] = -2 * gdScoreSumP2[i] / numScoreSnps[i];
     }
-}
-
-void SampleGenoAncestry::CalculateGd4V0Scores()
-{
-    double gd4SumP1 = 0;
-    double gd4SumP2 = 0;
-    int numGd4Snps = 0;
-
-    for (int snpNo = 0; snpNo < numAllAncSnps; snpNo++) {
-        float p1 = ancSnps->snps[snpNo].refPopAfs[3]; // AF of ref pop Latin American 1
-        float p2 = ancSnps->snps[snpNo].refPopAfs[4]; // AF of ref pop SAS
-  
-        // Use ref pops for normalization for now, but it will be better to choose different sets for normalization         
-        float u1 = p1;
-        float u2 = p2;
-  
-        if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
-            gd4SumP1 += u1 * log(p1/p2) + (1-u1) * log((1 - p1)/(1 - p2));
-            gd4SumP2 += u2 * log(p1/p2) + (1-u2) * log((1 - p1)/(1 - p2));
-
-            numGd4Snps++;
-        }
-    }
-    
-    gd4Gd0P1 = -2 * gd4SumP1 / numGd4Snps;
-    gd4Gd0P2 = -2 * gd4SumP2 / numGd4Snps;
 }
 
 void SampleGenoAncestry::SetAncestryPvalues(int thNo)
@@ -320,12 +293,6 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         float nomGdScoreP1[numSubPopScores];
         float nomGdScoreP2[numSubPopScores];
 
-        // For calculating normalized GD4 score
-        double nomGd4SumP1 = 0;
-        double nomGd4SumP2 = 0;
-        double smpGd4Sum = 0;
-        int numGd4Snps = 0;
-        
         // Assuming some reference populations might not have allele freqs for all Ancestry SNPs,
         // which is not ture for the current 5 reference populations being used
         int refPopSnps[numRefPops]; // Counts of SNPs with freqs for each ref population
@@ -334,29 +301,29 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         }
 
         bool hasRefPv = false;
-        int snpNo = 0;
-        for (snpNo = 0; snpNo < numAncSnps; snpNo++) {
-            int geno = (*ancSnpCodedGenos)[snpNo][smpNo];
-            int ancSnpId = (*ancSnpIds)[snpNo];
+        int ancSnpNo = 0;
+        for (ancSnpNo = 0; ancSnpNo < numAncSnps; ancSnpNo++) {
+            int geno = (*ancSnpCodedGenos)[ancSnpNo][smpNo];
+            int snpNo = (*ancSnpIds)[ancSnpNo];
 
             // Alt allele freq p of the 3 vertices
-            double v0p = ancSnps->snps[ancSnpId].vtxPopAfs[0];
-            double v1p = ancSnps->snps[ancSnpId].vtxPopAfs[1];
-            double v2p = ancSnps->snps[ancSnpId].vtxPopAfs[2];
+            double v0p = ancSnps->snps[snpNo].vtxPopAfs[0];
+            double v1p = ancSnps->snps[snpNo].vtxPopAfs[1];
+            double v2p = ancSnps->snps[snpNo].vtxPopAfs[2];
 
             if (geno > -1 && geno < 3) {
                 if (debug && 0) {
-                    cout << "    Snp No. " << snpNo << " ID " << ancSnpId
-                    << " rs " << ancSnps->snps[ancSnpId].rs
-                    << " ref " << ancSnps->snps[ancSnpId].ref
-                    << " alt " << ancSnps->snps[ancSnpId].alt
-                    << " v0 " << ancSnps->snps[ancSnpId].vtxPopAfs[0]
-                    << " p0 " << ancSnps->snps[ancSnpId].refPopAfs[0]
+                    cout << "    Anc snp No. " << ancSnpNo << " Snp No. " << snpNo
+                    << " rs " << ancSnps->snps[snpNo].rs
+                    << " ref " << ancSnps->snps[snpNo].ref
+                    << " alt " << ancSnps->snps[snpNo].alt
+                    << " v0 " << ancSnps->snps[snpNo].vtxPopAfs[0]
+                    << " p0 " << ancSnps->snps[snpNo].refPopAfs[0]
                     << " geno " << geno << "\n";
                 }
 
                 for (int popId = 0; popId < numRefPops; popId++) {
-                    double pv = ancSnps->snps[ancSnpId].refPopAfs[popId]; // reference population allele freq p value
+                    double pv = ancSnps->snps[snpNo].refPopAfs[popId]; // reference population allele freq p value
 
                     if (pv > 0 && pv < 1) {
                         double qv = 1 - pv;
@@ -381,9 +348,9 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
 
                 // Calculate expected P values for each of the vertices E, F, A
                 for (int vtxId = 0; vtxId < 3; vtxId++) {
-                    vtxExpPeSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][0][ancSnpId];
-                    vtxExpPfSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][1][ancSnpId];
-                    vtxExpPaSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][2][ancSnpId];
+                    vtxExpPeSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][0][snpNo];
+                    vtxExpPfSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][1][snpNo];
+                    vtxExpPaSums[vtxId] += ancSnps->vtxExpGenoDists[vtxId][2][snpNo];
                 }
 
                 // Calculate extra GD scores from subpopulation references
@@ -391,18 +358,18 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                     int refPopId1 = scorePopIdx1[sId];
                     int refPopId2 = scorePopIdx2[sId];
                     
-                    float p1 = ancSnps->snps[ancSnpId].refSubPopAfs[refPopId1];
-                    float p2 = ancSnps->snps[ancSnpId].refSubPopAfs[refPopId2];
+                    float p1 = ancSnps->snps[snpNo].refSubPopAfs[refPopId1];
+                    float p2 = ancSnps->snps[snpNo].refSubPopAfs[refPopId2];
                     
-                    float u1 = ancSnps->snps[ancSnpId].nomSubPopAfs[refPopId1];
-                    float u2 = ancSnps->snps[ancSnpId].nomSubPopAfs[refPopId2];
+                    float u1 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId1];
+                    float u2 = ancSnps->snps[snpNo].nomSubPopAfs[refPopId2];
 
                     if (refPopId1 >= 100) {
-                        p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-1];
+                        p1 = ancSnps->snps[snpNo].refPopAfs[refPopId1-100];
                         u1 = p1;
                     }
                     if (refPopId2 >= 100) {
-                        p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-1];
+                        p2 = ancSnps->snps[snpNo].refPopAfs[refPopId2-100];
                         u2 = p2;
                     }
                     
@@ -421,24 +388,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                         smpGdScoreSnpNum[sId]++;
                     }                      
                 }
-
-                // Calculate scores for normalized GD4
-                float p1 = ancSnps->snps[ancSnpId].refPopAfs[3]; // AF of ref pop Latin American 1
-                float p2 = ancSnps->snps[ancSnpId].refPopAfs[4]; // AF of ref pop SAS
-                float u1 = p1;
-                float u2 = p2;
                 
-                float logp1p2 = log(p1/p2);
-                float logq1q2 = log((1-p1)/(1-p2));
-                
-                if      (geno == 2) smpGd4Sum += logq1q2 * 2;
-                else if (geno == 1) smpGd4Sum += logp1p2 + logq1q2;
-                else if (geno == 0) smpGd4Sum += logp1p2 * 2;
-                
-                nomGd4SumP1 += (u1 * logp1p2 + (1-u1) * logq1q2) * 2;
-                nomGd4SumP2 += (u2 * logp1p2 + (1-u2) * logq1q2) * 2;
-                
-                numGd4Snps++;
                 numGenoSnps++;
             }
         }
@@ -451,25 +401,6 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             smpGdScore[i] = subPopGdNormP1 + (subPopGdNormP2-subPopGdNormP1)*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
         }
 
-        // Calculate GD4
-        float rawGd4 = -1 * smpGd4Sum / numGd4Snps;
-        float nomGd4P1 = -1 * nomGd4SumP1 / numGd4Snps;
-        float nomGd4P2 = -1 * nomGd4SumP2 / numGd4Snps;
-        float gd4 = gd4Gd0P1 + (gd4Gd0P2 - gd4Gd0P1) * (rawGd4 - nomGd4P1) / (nomGd4P2 - nomGd4P1);
-        
-        if (debug && thNo == 0 && smpCnt < 5) {
-          cout << "calc gd4 with gd4Gd0P1 " << gd4Gd0P1 << " gd4Gd0P2 " << gd4Gd0P2 << " gd4 = " << gd4 << "\n";
-          cout << "rgd4 " << rawGd4 << " nomGd4P1 " << nomGd4P1 << " nomGd4P2 " << nomGd4P2 << " numGd4Snps "
-               << numGd4Snps << " smpGd4Sum " << smpGd4Sum << " numGenoSnps = " << numGenoSnps << "\n";
-          
-            printf("Smp %d: GD4 %6.4f GD0p1 %6.4f GD0p2 %6.4f rGD4 %6.4f nGD41 %6.4f nGD42 %6.4f n %d s %5.2f\n",
-                   smpCnt, gd4, gd4Gd0P1, gd4Gd0P2, rawGd4, nomGd4SumP1, nomGd4SumP2, numGd4Snps, smpGd4Sum);
-            for (int i = 0; i < numSubPopScores; i++) {
-                printf("\tScore No. %d: Smp raw %6.4f nmd %6.4f Norms %6.4f - %6.4f\n", i, smpGdRawScore[i], smpGdScore[i], nomGdScoreP1[i], nomGdScoreP2[i]);
-            }
-            cout << "\n";
-        }
-                
         for (int popId = 0; popId < numRefPops; popId++) {
             if (refPopSnps[popId] > 0) {
                 popMeanPvals[popId] = -1 * popPvalues[popId]/refPopSnps[popId];
@@ -517,7 +448,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             delete smpGd;
         }
 
-        samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, gd4, ePct, fPct, aPct, hasAncGeno);
+        samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, ePct, fPct, aPct, hasAncGeno);
         samples[smpNo].SetSubPopGdScores(smpGdScore);
         
         smpCnt++;
@@ -534,8 +465,8 @@ void SampleGenoAncestry::ShowSummary()
     cout << "Num ancestry SNPs in dataset: " << numAncSnps << "\n";
 
     for (int i = 0; i < numAncSnps; i++) {
-        int ancSnpId = (*ancSnpIds)[i];
-        cout << "No. " << i << ": " << ancSnpId << ": ";
+        int snpNo = (*ancSnpIds)[i];
+        cout << "No. " << i << ": " << snpNo << ": ";
 
         for (int j = 0; j < numSamples; j++) {
             if  (j < 20) cout << int((*ancSnpCodedGenos)[i][j]) << " ";

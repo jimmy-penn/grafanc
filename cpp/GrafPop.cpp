@@ -92,12 +92,11 @@ int main(int argc, char* argv[])
 
     int numThreads = thread::hardware_concurrency();
     numThreads--;
-
+    
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 
     smpGenoAnc->CalculateSubPopGd0Values();
-    smpGenoAnc->CalculateGd4V0Scores();
-    
+
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
         VcfSampleAncestrySnpGeno *vcfGeno = new VcfSampleAncestrySnpGeno(genoDs, ancSnps);
         bool dataRead = vcfGeno->ReadDataFromFile();

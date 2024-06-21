@@ -7,7 +7,7 @@
 #include "FamFileSamples.h"
 #include "SampleGenoDist.h"
 
-static const int numSubPopScores = 12;
+static const int numSubPopScores = 13;
 
 class GenoSample
 {
@@ -20,13 +20,13 @@ public:
     // Ancestry results calculated from genotypes
     int numAncSnps;
     bool ancIsSet;
-    float gd1, gd2, gd3, gd4;
+    float gd1, gd2, gd3;
     float ePct, fPct, aPct;   // Ancestry (EUR, AFR, EAS) components of the sample
     float subPopScores[numSubPopScores];
 
 public:
     GenoSample(string);
-    void SetAncestryScores(int, float, float, float, float, float, float, float, bool);
+    void SetAncestryScores(int, float, float, float, float, float, float, bool);
     void SetSubPopGdScores(float*);
 };
 
@@ -49,13 +49,13 @@ public:
     vector<GenoSample> samples;
     vector<int> *ancSnpIds;
     vector<char*> *ancSnpCodedGenos; // Use char, instead of int, to save space
-    const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EU1", "EU2", "EU3", "AF1", "AF2", "AF3", "AF4", "AF5", "AF6"};
+    const string popScoreNames[numSubPopScores] = {"GL1", "GL2", "EA1", "EA2", "EA3", "EU1", "EU2", "AF1", "AF2", "AF3", "AF4", "AF5", "AF6"};
     
     // Pair of ref pops to use for each score    
     // Ref pops are: chn, jpn, sea, pac, ceu, seu, fin
-    const int scorePopIdx1[numSubPopScores] = {0, 0, 2, 4, 4,   5, 7,  7, 8,  8,  7,  8};
-    const int scorePopIdx2[numSubPopScores] = {2, 1, 3, 5, 6, 103, 9, 11, 9, 11, 10, 10};
-
+    const int scorePopIdx1[numSubPopScores] = {103,   5, 0, 0, 2, 4, 4, 7,  7, 8,  8,  7,  8};
+    const int scorePopIdx2[numSubPopScores] = {104, 103, 2, 1, 3, 5, 6, 9, 11, 9, 11, 10, 10};
+    
     // Expected GD scores of subpopulations when all SNPs are included
     float subPopGd0P1[numSubPopScores];
     float subPopGd0P2[numSubPopScores];
@@ -63,9 +63,6 @@ public:
     // Normalizing GD scores to subPopGd0P1 = -1 and subPopGd0P2 = 1
     const float subPopGdNormP1 = -1.0;
     const float subPopGdNormP2 = 1.0;
-    
-    // Expected GD4 scores for the two ref pops Lat1 and SAS
-    float gd4Gd0P1, gd4Gd0P2;
     
     SampleGenoAncestry(AncestrySnps*, int=100);
     ~SampleGenoAncestry();
@@ -78,8 +75,7 @@ public:
     void SetNumThreads(int);
     void InitPopPvalues();
     void CalculateSubPopGd0Values();
-    void CalculateGd4V0Scores();
-    
+
     int GetNumSamples() { return numSamples; };
     int GetNumAncSamples() { return numAncSmps; };
     bool HasEnoughAncestrySnps(int numSnps) { return numSnps >= minAncSnps; }
