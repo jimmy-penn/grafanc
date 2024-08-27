@@ -2,9 +2,9 @@
 
 SampleGenoDist::SampleGenoDist(GenoDist *ec, GenoDist *fc, GenoDist *ac, GenoDist *sp)
 {
-    CopyGenoDist(&aDist, ac);
     CopyGenoDist(&eDist, ec);
     CopyGenoDist(&fDist, fc);
+    CopyGenoDist(&aDist, ac);
     CopyGenoDist(&sDist, sp);
 
     afrPosition.x = 1.05;
@@ -14,16 +14,16 @@ SampleGenoDist::SampleGenoDist(GenoDist *ec, GenoDist *fc, GenoDist *ac, GenoDis
 
 void SampleGenoDist::CopyGenoDist(GenoDist *p, GenoDist *d)
 {
-    p->a = d->a;
     p->e = d->e;
     p->f = d->f;
+    p->a = d->a;
 }
 
 void SampleGenoDist::SetPointWithDist(Point *p, GenoDist *d)
 {
-    p->x = d->a;
     p->y = d->e;
     p->z = d->f;
+    p->x = d->a;
 }
 
 void SampleGenoDist::CopyPoint(Point *p, Point *s)
@@ -98,7 +98,7 @@ void SampleGenoDist::TransformAllDists()
     RotatePointOny(&aPt, theta2);
     RotatePointOny(&sPt, theta2);
 
-    // Rotate on y-axis
+    // Rotate on x-axis
     double theta3 = atan2(ePt.y, ePt.z) * 180 / pi;
     theta3 -= 90;
     RotatePointOnx(&ePt, theta3);
@@ -165,12 +165,13 @@ void SampleGenoDist::ShowPositions(string title, bool showOrig)
         cout << "\nPositions of " << title << " after transformation\n";
     }
 
+    // Original assignments: E -> y; F => z; A => x
     printf("\tE: %6.4f  %6.4f  %6.4f\n", ePt.x, ePt.y, ePt.z);
     printf("\tF: %6.4f  %6.4f  %6.4f\n", fPt.x, fPt.y, fPt.z);
     printf("\tA: %6.4f  %6.4f  %6.4f\n", aPt.x, aPt.y, aPt.z);
-    //printf("\tS: %6.4f  %6.4f  %6.4f\n", sPt.x, sPt.y, sPt.z);
+    printf("\tS: %6.4f  %6.4f  %6.4f\n", sPt.x, sPt.y, sPt.z);
 
     //cout << "\nWeights\n";
-    //printf("\tE: %6.4f  %6.4f  %6.4f\n", eWt, fWt, aWt);
+    printf("\tE: %6.4f  %6.4f  %6.4f\n", eWt, fWt, aWt);
     printf("\n");
 }

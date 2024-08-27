@@ -44,16 +44,7 @@ AncestrySnps::AncestrySnps()
   subPopNames[0] = "chn"; // Chinease, especially Northern Chinese
   subPopNames[1] = "jpn"; // Japanese
   subPopNames[2] = "sea"; // Southeast Asian: Thai, Vietnamese, ...
-  subPopNames[3] = "pac"; // Pacific Islander
-  subPopNames[4] = "ceu"; // English, Irish, ...
-  subPopNames[5] = "seu"; // South European: Italian, ...
-  subPopNames[6] = "fin"; // Finnish
-  subPopNames[7] = "yri"; // YRI
-  subPopNames[8] = "esn"; // ESN
-  subPopNames[9] = "msl"; // MSL
-  subPopNames[10]= "gwd"; // GWD
-  subPopNames[11]= "lwk"; // LWK
-  
+
   for (int popId = 0; popId < numSubPops; popId++) {
       refSubPopNames[popId] = "ref_" + subPopNames[popId];
       nomSubPopNames[popId] = "nom_" + subPopNames[popId];
@@ -85,7 +76,7 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
         popExpPaSums[popId] = 0;
     }
 
-    int lineLen = 300;
+    int lineLen = 500;
     char snpLine[lineLen];
 
     FILE *ifp = fopen(ancSnpFile.c_str(), "r");
@@ -97,7 +88,7 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
     int snpId = 0;
     int rsNum, chr, g37, g38;
     char a1, a2;
-    float rfEur, rfAfa, rfAsn, rfLat, rfSas, vtEur, vtAfr, vtEas;
+    float rfEur, rfAfr, rfEas, rfLat, rfSas, vtEur, vtAfr, vtEas;
 
     while (fgets(snpLine, lineLen, ifp) != NULL && fileIsValid == true) {
         if (lineNo == 0) {
@@ -106,21 +97,21 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
             }
         }
         else {
-            sscanf(snpLine, "%d %d %d %d %c %c %f %f %f %f %f %f %f %f",
-            &chr, &g37, &g38, &rsNum, &a1, &a2, &rfEur, &rfAfa, &rfAsn, &rfLat, &rfSas, &vtEur, &vtAfr, &vtEas);
+            sscanf(snpLine, "%d %d %d %d %c %c %f %f %f %f %f",
+            &chr, &g37, &g38, &rsNum, &a1, &a2, &rfEur, &rfAfr, &rfEas, &rfLat, &rfSas);
 
             float* refPopAfs = new float[numRefPops];
             float* vtxPopAfs = new float[numVtxPops];
 
             refPopAfs[0] = rfEur;
-            refPopAfs[1] = rfAfa;
-            refPopAfs[2] = rfAsn;
+            refPopAfs[1] = rfAfr;
+            refPopAfs[2] = rfEas;
             refPopAfs[3] = rfLat;
             refPopAfs[4] = rfSas;
 
-            vtxPopAfs[0] = vtEur;
-            vtxPopAfs[1] = vtAfr;
-            vtxPopAfs[2] = vtEas;
+            vtxPopAfs[0] = rfEur;
+            vtxPopAfs[1] = rfAfr;
+            vtxPopAfs[2] = rfEas;
 
             AncestrySnp ancSnp(snpId, rsNum, chr, g37, g38, a1, a2, refPopAfs, vtxPopAfs);
 
@@ -180,7 +171,7 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
     }
     fclose(ifp);
 
-    ASSERT(snpId == numAllAncSnps, "snpId = " << numAllAncSnps << ".\n");
+    ASSERT(snpId == numAllAncSnps, "snpId = " << snpId << " all anc SNPs = " << numAllAncSnps << ".\n");
 
     for (int vtxId = 0; vtxId < 3; vtxId++) {
         vtxPopExpGds[vtxId].e = -1 * popExpPeSums[vtxId]/snpId;
@@ -190,7 +181,7 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
 
     cout << "Read " << snpId << " ancestry SNPs from file " << ancSnpFile << "\n\n";
     if (0) {
-        cout << "Expected vertex genetic distances\n";
+        cout << "Expected vertex genetic distances (#SNPs = " << numAllAncSnps << ")\n";
         for (int vtxId = 0; vtxId < 3; vtxId++) {
             cout << "\tVertex " << vtxId << "\n";
             cout << "\t\tEUR: " << vtxPopExpGds[vtxId].e << "\n";
@@ -216,7 +207,8 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
     char* line = NULL;
     size_t len = 0;
     const string delim = "\t";
-
+    const int rsCol = 3;
+    
     // Make sure the file has correct columns
     bool isRightFile = true;
     if ((getline(&line, &len, fp)) != -1) {
@@ -227,7 +219,7 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
         if (numVars <= numSubPops) {
             isRightFile = false;
         }
-        else if (vars[0] != "rs") {
+        else if (vars[rsCol] != "rs") {
             isRightFile = false;
         }
         else {
@@ -235,7 +227,7 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
                 string var = TrimString(vars[i+1]);
 
                 if (var != refSubPopNames[i]) {
-                    isRightFile = false;
+//                    isRightFile = false;
                     break;
                 }
             }
@@ -248,18 +240,31 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
     }
     
     ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (" << expCols << ")!\n");
+
+    const int chnCol = 15;    
+    const int filCol = 17;    
+    const int jpnCol = 19;    
     
     while ((getline(&line, &len, fp)) != -1) {
         ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
       
         vector<string> vals = SplitString(string(line), delim);
-        int rs = stoi(vals[0]); 
+        int rs = stoi(vals[rsCol]); 
         ASSERT(rs == snps[snpId].rs, "ERROR in " << refPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
         
         float popAfs[numSubPops];
         for (int i = 0; i < numSubPops; i++) {
             // TODO: Add code to make sure AF value is a number
-            popAfs[i] = stof(vals[i+1]);
+            // popAfs[i] = stof(vals[i+1]);
+            if (i == 0) {
+              popAfs[i] = stof(vals[chnCol]);
+            }
+            else if (i == 1) {
+              popAfs[i] = stof(vals[jpnCol]);
+            }
+            else if (i == 2) {
+              popAfs[i] = stof(vals[filCol]);
+            }
         }
           
         snps[snpId].SetRefSubPopAfs(popAfs);

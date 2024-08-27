@@ -8,30 +8,10 @@ int main(int argc, char* argv[])
 
     string disclaimer =
     "\n *==========================================================================="
-    "\n *  GrafPop: Software to infer subject ancestry from genotypes quickly"
+    "\n *  GrafAnc: Software to infer subject ancestry from genotypes quickly"
     "\n *  Yumi (Jimmy) Jin, PhD"
-    "\n *  jinyu@ncbi.nlm.nih.gov"
-    "\n *  04/05/2021"
-    "\n *"
-    "\n *                            PUBLIC DOMAIN NOTICE"
-    "\n *               National Center for Biotechnology Information"
-    "\n *"
-    "\n *  This software/database is a \"United States Government Work\" under the"
-    "\n *  terms of the United States Copyright Act.  It was written as part of"
-    "\n *  the author's official duties as a United States Government employee and"
-    "\n *  thus cannot be copyrighted.  This software/database is freely available"
-    "\n *  to the public for use. The National Library of Medicine and the U.S."
-    "\n *  Government have not placed any restriction on its use or reproduction."
-    "\n *"
-    "\n *  Although all reasonable efforts have been taken to ensure the accuracy"
-    "\n *  and reliability of the software and data, the NLM and the U.S."
-    "\n *  Government do not and cannot warrant the performance or results that"
-    "\n *  may be obtained by using this software or data. The NLM and the U.S."
-    "\n *  Government disclaim all warranties, express or implied, including"
-    "\n *  warranties of performance, merchantability or fitness for any particular"
-    "\n *  purpose."
-    "\n *"
-    "\n *  Please cite the author in any work or product based on this material."
+    "\n *  Jimmy.Jin@Pennmedicine.upenn.edu"
+    "\n *  08/27/2024"
     "\n *"
     "\n *===========================================================================";
 
@@ -63,14 +43,14 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    string ancSnpFile = FindFile("AncInferSNPs.txt");
+    string ancSnpFile = FindFile("AncSnpPopAFs.txt");
     if (ancSnpFile == "") {
-        cout << "ERROR: didn't find file AncInferSNPs.txt. Please put the file under 'data' directory.\n\n";
+        cout << "ERROR: didn't find file NewGpAncSNPsImp.txt. Please put the file under 'data' directory.\n\n";
         return 0;
     }
 
-    string refSubPopFile = "../../testdata/RefSubPopSNPs.txt";
-    string nomSubPopFile = "../../testdata/NomSubPopSNPs.txt";
+    string refSubPopFile = ancSnpFile;
+    string nomSubPopFile = "";
     
     if (argc > 3) refSubPopFile = argv[3];      
     if (argc > 4) nomSubPopFile = argv[4];      
@@ -78,10 +58,10 @@ int main(int argc, char* argv[])
     AncestrySnps *ancSnps = new AncestrySnps();
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
     cout << "Read " << numSnpsInAncFile << " SNPs from " << ancSnpFile << "\n";     
-    
+
     int numSnpsInRefPopFile = ancSnps->ReadRefSubPopSnpsFromFile(refSubPopFile);
     cout << "Read " << numSnpsInRefPopFile << " SNPs from " << refSubPopFile << "\n"; 
-    
+
     if (FileExists(nomSubPopFile.c_str())) {
         int numSnpsInNomPopFile = ancSnps->ReadNomSubPopSnpsFromFile(nomSubPopFile);
         cout << "Read " << numSnpsInNomPopFile << " SNPs from " << nomSubPopFile << "\n"; 
@@ -92,7 +72,7 @@ int main(int argc, char* argv[])
 
     int numThreads = thread::hardware_concurrency();
     numThreads--;
-    
+
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 
     smpGenoAnc->CalculateSubPopGd0Values();

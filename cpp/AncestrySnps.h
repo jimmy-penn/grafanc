@@ -3,10 +3,10 @@
 
 #include "Util.h"
 
-static const int numAllAncSnps = 100437;
+static const int numAllAncSnps = 282424;
 static const int numRefPops = 5;
 static const int numVtxPops = 3;
-static const int numSubPops = 12;
+static const int numSubPops = 3;
 
 class AncestrySnp
 {

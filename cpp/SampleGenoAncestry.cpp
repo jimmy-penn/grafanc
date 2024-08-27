@@ -48,6 +48,7 @@ SampleGenoAncestry::SampleGenoAncestry(AncestrySnps *aSnps, int minSnps)
     numThreads = 1;
     vtxExpGd0 = new SampleGenoDist(&aSnps->vtxPopExpGds[0], &aSnps->vtxPopExpGds[1],
         &aSnps->vtxPopExpGds[2], &aSnps->vtxPopExpGds[0]);
+
     vtxExpGd0->TransformAllDists();
     vtxExpGd0->CalculateBaryCenters();
 }
@@ -312,7 +313,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             double v2p = ancSnps->snps[snpNo].vtxPopAfs[2];
 
             if (geno > -1 && geno < 3) {
-                if (debug && 0) {
+                if (0) {
                     cout << "    Anc snp No. " << ancSnpNo << " Snp No. " << snpNo
                     << " rs " << ancSnps->snps[snpNo].rs
                     << " ref " << ancSnps->snps[snpNo].ref
@@ -331,13 +332,13 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                         double abPv = log(pv * qv * 2);
                         double aaPv = log(pv) * 2;
 
-                        if      (geno == 2) {
+                        if      (geno == 0) {
                             popPvalues[popId] += bbPv;
                         }
                         else if (geno == 1) {
                             popPvalues[popId] += abPv;
                         }
-                        else if (geno == 0) {
+                        else if (geno == 2) {
                             popPvalues[popId] += aaPv;
                         }
 
