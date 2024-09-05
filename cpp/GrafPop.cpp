@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 
     string ancSnpFile = FindFile("AncSnpPopAFs.txt");
     if (ancSnpFile == "") {
-        cout << "ERROR: didn't find file NewGpAncSNPsImp.txt. Please put the file under 'data' directory.\n\n";
+        cout << "ERROR: didn't find file AncSnpPopAFs.txt. Please put the file under 'data' directory.\n\n";
         return 0;
     }
 
@@ -72,6 +72,9 @@ int main(int argc, char* argv[])
 
     int numThreads = thread::hardware_concurrency();
     numThreads--;
+
+// Testing 
+//numThreads = 1;
 
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 

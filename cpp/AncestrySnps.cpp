@@ -241,10 +241,6 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
     
     ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (" << expCols << ")!\n");
 
-    const int chnCol = 15;    
-    const int filCol = 17;    
-    const int jpnCol = 19;    
-    
     while ((getline(&line, &len, fp)) != -1) {
         ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
       
@@ -255,16 +251,7 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
         float popAfs[numSubPops];
         for (int i = 0; i < numSubPops; i++) {
             // TODO: Add code to make sure AF value is a number
-            // popAfs[i] = stof(vals[i+1]);
-            if (i == 0) {
-              popAfs[i] = stof(vals[chnCol]);
-            }
-            else if (i == 1) {
-              popAfs[i] = stof(vals[jpnCol]);
-            }
-            else if (i == 2) {
-              popAfs[i] = stof(vals[filCol]);
-            }
+            popAfs[i] = stof(vals[i+ancSnpFileOthCols]);
         }
           
         snps[snpId].SetRefSubPopAfs(popAfs);

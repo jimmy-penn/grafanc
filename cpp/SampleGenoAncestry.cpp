@@ -195,7 +195,7 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
     
     for (int snpNo = 0; snpNo < numAllAncSnps; snpNo++) {
         if (debug && snpNo % 50000 == 0) cout << "SNP No " << snpNo << "\n";
-        
+
         for (int i = 0; i < numSubPopScores; i++) {
             int refPopId1 = scorePopIdx1[i];
             int refPopId2 = scorePopIdx2[i];
@@ -218,9 +218,12 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
             
             // Only count those SNPs for which there are both ref and normalization pop freqs
             if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
+                double logp = log(p2/p1);
+                double logq = log((1-p2)/(1-p1));
+                
                 // Score from only one of the two alleles is added              
-                gdScoreSumP1[i] += u1 * log(p1/p2) + (1-u1) * log((1-p1)/(1-p2));
-                gdScoreSumP2[i] += u2 * log(p1/p2) + (1-u2) * log((1-p1)/(1-p2));
+                gdScoreSumP1[i] += (u1 * logp + (1-u1) * logq) * 2;
+                gdScoreSumP2[i] += (u2 * logp + (1-u2) * logq) * 2;
                 
                 numScoreSnps[i]++;
             }
@@ -233,8 +236,8 @@ void SampleGenoAncestry::CalculateSubPopGd0Values()
     
     for (int i = 0; i < numSubPopScores; i++) {
         // Subject GD scores are calculated for two alleles on each SNP
-        subPopGd0P1[i] = -2 * gdScoreSumP1[i] / numScoreSnps[i];
-        subPopGd0P2[i] = -2 * gdScoreSumP2[i] / numScoreSnps[i];
+        subPopGd0P1[i] = gdScoreSumP1[i] / numScoreSnps[i];
+        subPopGd0P2[i] = gdScoreSumP2[i] / numScoreSnps[i];
     }
 }
 
@@ -294,8 +297,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         float nomGdScoreP1[numSubPopScores];
         float nomGdScoreP2[numSubPopScores];
 
-        // Assuming some reference populations might not have allele freqs for all Ancestry SNPs,
-        // which is not ture for the current 5 reference populations being used
+        // In case some reference populations might not have allele freqs for all Ancestry SNPs
         int refPopSnps[numRefPops]; // Counts of SNPs with freqs for each ref population
         for (int popId = 0; popId < numRefPops; popId++) {
             refPopSnps[popId] = 0;
@@ -328,18 +330,15 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
 
                     if (pv > 0 && pv < 1) {
                         double qv = 1 - pv;
-                        double bbPv = log(qv) * 2;
-                        double abPv = log(pv * qv * 2);
-                        double aaPv = log(pv) * 2;
 
                         if      (geno == 0) {
-                            popPvalues[popId] += bbPv;
+                            popPvalues[popId] += log(qv) * 2;
                         }
                         else if (geno == 1) {
-                            popPvalues[popId] += abPv;
+                            popPvalues[popId] += log(pv * qv * 2);
                         }
                         else if (geno == 2) {
-                            popPvalues[popId] += aaPv;
+                            popPvalues[popId] += log(pv) * 2;
                         }
 
                         hasRefPv = true;
@@ -376,15 +375,15 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                     
                     // Calculate three values for each SNP locus: sample GD, and the two norm pop GDs
                     if (p1 > 0 && p1 < 1 && p2 > 0 && p2 < 1 && u1 > 0 && u1 < 1 && u2 > 0 && u2 < 1) {
-                        float logp1p2 = log(p1/p2);
-                        float logq1q2 = log((1-p1)/(1-p2));
+                        float logp = log(p2/p1);
+                        float logq = log((1-p2)/(1-p1));
                         
-                        if      (geno == 2) smpGdScoreSum[sId] += logq1q2 * 2;
-                        else if (geno == 1) smpGdScoreSum[sId] += logp1p2 + logq1q2;
-                        else if (geno == 0) smpGdScoreSum[sId] += logp1p2 * 2;
+                        if      (geno == 2) smpGdScoreSum[sId] += logp * 2;
+                        else if (geno == 1) smpGdScoreSum[sId] += logp + logq;
+                        else if (geno == 0) smpGdScoreSum[sId] += logq * 2;
 
-                        nomGdScoreSumP1[sId] += (u1 * logp1p2 + (1-u1) * logq1q2) * 2;
-                        nomGdScoreSumP2[sId] += (u2 * logp1p2 + (1-u2) * logq1q2) * 2;
+                        nomGdScoreSumP1[sId] += (u1 * logp + (1-u1) * logq) * 2;
+                        nomGdScoreSumP2[sId] += (u2 * logp + (1-u2) * logq) * 2;
                         
                         smpGdScoreSnpNum[sId]++;
                     }                      
@@ -395,9 +394,9 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         }
 
         for (int i = 0; i < numSubPopScores; i++) {
-            smpGdRawScore[i] = -1 * smpGdScoreSum[i]   / smpGdScoreSnpNum[i];
-            nomGdScoreP1[i]  = -1 * nomGdScoreSumP1[i] / smpGdScoreSnpNum[i];
-            nomGdScoreP2[i]  = -1 * nomGdScoreSumP2[i] / smpGdScoreSnpNum[i];
+            smpGdRawScore[i] = smpGdScoreSum[i]   / smpGdScoreSnpNum[i];
+            nomGdScoreP1[i]  = nomGdScoreSumP1[i] / smpGdScoreSnpNum[i];
+            nomGdScoreP2[i]  = nomGdScoreSumP2[i] / smpGdScoreSnpNum[i];
             // Normalize the GD score
             smpGdScore[i] = subPopGdNormP1 + (subPopGdNormP2-subPopGdNormP1)*(smpGdRawScore[i]-nomGdScoreP1[i])/(nomGdScoreP2[i]-nomGdScoreP1[i]);
         }
@@ -420,6 +419,8 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             smpDist.f = popMeanPvals[1];
             smpDist.a = popMeanPvals[2];
 
+//  cout << "n = " << numGenoSnps << " Smp PE = " << smpDist.e << " PF = " << smpDist.f << " PA = " << smpDist.a << "\n"; 
+            
             for (int vtxId = 0; vtxId < numVtxPops; vtxId++) {
                 vtxExpDists[vtxId].e  = -1 * vtxExpPeSums[vtxId]/numGenoSnps;
                 vtxExpDists[vtxId].f  = -1 * vtxExpPfSums[vtxId]/numGenoSnps;
@@ -454,7 +455,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         
         smpCnt++;
         if (thNo == 0 && smpCnt % 100 == 0)
-            cout  << "\tCalculated scores for " << smpCnt << " of " << chkThSmps << " samples\n";
+            cout  << "\tCalculated scores for " << smpCnt << " of total " << chkThSmps << " samples\n";
     }
 }
 

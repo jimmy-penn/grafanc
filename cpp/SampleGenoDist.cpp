@@ -7,7 +7,7 @@ SampleGenoDist::SampleGenoDist(GenoDist *ec, GenoDist *fc, GenoDist *ac, GenoDis
     CopyGenoDist(&aDist, ac);
     CopyGenoDist(&sDist, sp);
 
-    afrPosition.x = 1.05;
+    afrPosition.x = 1.08;
     afrPosition.y = 1.10;
     afrPosition.z = 0.00;
 }

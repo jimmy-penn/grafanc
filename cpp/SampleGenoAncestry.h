@@ -7,7 +7,7 @@
 #include "FamFileSamples.h"
 #include "SampleGenoDist.h"
 
-static const int numSubPopScores = 2;
+static const int numSubPopScores = 8;
 
 class GenoSample
 {
@@ -49,12 +49,21 @@ public:
     vector<GenoSample> samples;
     vector<int> *ancSnpIds;
     vector<char*> *ancSnpCodedGenos; // Use char, instead of int, to save space
-    const string popScoreNames[numSubPopScores] = {"EA1", "EA2"};
+    
+    //                                    0         1          2            3         4          5          6        7         8   
+    const string ancSnpFileCols[25] = {"UKBBEUR", "UKBBAFR", "UKBBEAS", "Nigeria", "Ghana", "Zimbabwe", "Uganda", "Kenya", "Barbados", 
+                                     
+    //                                    9       10            11            12        13       14        15                                           
+                                      "China", "HongKong", "Philippines", "Thailand", "Japan", "Nepal", "VietNam",
+                                     
+    //                                    16           17           18         19        20      21     22      23    24                                           
+                                      "Pakistan", "Bangladesh", "SriLanka", "India2", "Kenya2", "CEU", "GBR", "FIN", "TSI"};
+
+    const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EA4", "EA5", "EA6", "EA7", "EA8"};
     
     // Pair of ref pops to use for each score    
-    // Ref pops are: chn, jpn, sea, pac, ceu, seu, fin
-    const int scorePopIdx1[numSubPopScores] = {0, 0};
-    const int scorePopIdx2[numSubPopScores] = {2, 1};
+    const int scorePopIdx1[numSubPopScores] = { 9,  9,  9,  9, 10, 10, 11, 11};
+    const int scorePopIdx2[numSubPopScores] = {11, 13, 12, 14, 11, 13, 12, 13};
     
     // Expected GD scores of subpopulations when all SNPs are included
     float subPopGd0P1[numSubPopScores];
