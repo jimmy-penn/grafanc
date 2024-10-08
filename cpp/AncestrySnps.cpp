@@ -189,8 +189,6 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
 {
     ASSERT(FileExists(refPopFile.c_str()), "File " << refPopFile << " does not exist!\n");
     
-    cout << "Reading AFs from file " << refPopFile << "\n";  
-    
     int snpId = 0;
     
     FILE* fp = fopen(refPopFile.c_str(), "r");

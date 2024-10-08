@@ -7,7 +7,7 @@
 #include "FamFileSamples.h"
 #include "SampleGenoDist.h"
 
-static const int numSubPopScores = 17;
+static const int numSubPopScores = 13;
 
 class GenoSample
 {
@@ -62,12 +62,12 @@ public:
     //       16           17           18         19        20      21     22      23    24      25      26         27        28                                 
          "Pakistan", "Bangladesh", "SriLanka", "India2", "Kenya2", "CEU", "GBR", "FIN", "TSI", "PUR", "MXL_CLM", "UKBSAS", "UKBMEX"};
 
-    const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EA4", "EA5", "EA6", "AF1", "AF2", "AF3", "EU1", "EU2", "SA1", "SA2", "SA3", "SA4", "GL1", "GL2"};
+    const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EA4", "AF1", "AF2", "AF3", "EU1", "EU2", "SA1", "SA2", "IC1", "IC2"};
     
     // Pair of ref pops to use for each score   
-    //                                         EA1 EA2 EA3 EA4 EA5 EA6 AF1 AF2 AF3 EU1 EU2 SA1 SA2 SA3 SA4 GL1 GL2
-    const int scorePopIdx1[numSubPopScores] = { 9,  9,  9,  9, 11, 11,  3,  3,  6, 21, 21, 18, 19, 18, 18, 28, 24};
-    const int scorePopIdx2[numSubPopScores] = {11, 13, 12, 14, 12, 13,  5,  4,  8, 24, 23, 17, 16, 19, 16, 27, 25};
+    //                                         EA1 EA2 EA3 EA4 AF1 AF2 AF3 EU1 EU2 SA1 SA2 IC1 IC2
+    const int scorePopIdx1[numSubPopScores] = { 9,  9,  9,  9,  3,  3,  6, 21, 21, 18, 19, 28, 24};
+    const int scorePopIdx2[numSubPopScores] = {11, 13, 12, 14,  5,  4,  8, 24, 23, 17, 16, 27, 25};
     
     // Expected GD scores of subpopulations when all SNPs are included
     float subPopGd0P1[numSubPopScores];

@@ -299,9 +299,8 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         int bit2Pos = bit1Pos + 1;;
 
         for (ancSnpNo = 0; ancSnpNo < numAncSnps; ancSnpNo++) {
-            unsigned char chrGeno = (*ancSnpCodedGenos)[ancSnpNo][genoChrNo];
-
             unsigned char* chrGenos = (*ancSnpCodedGenos)[ancSnpNo];
+            unsigned char chrGeno = chrGenos[genoChrNo];
             int gsize = sizeof(chrGenos);
 
             unsigned int geno = 0;
@@ -327,10 +326,10 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                 }
 
                 for (int popId = 0; popId < numRefPops; popId++) {
-                    double pv = ancSnps->snps[snpNo].refPopAfs[popId]; // reference population allele freq p value
+                    float pv = ancSnps->snps[snpNo].refPopAfs[popId]; // reference population allele freq p value
 
                     if (pv > 0 && pv < 1) {
-                        double qv = 1 - pv;
+                        float qv = 1 - pv;
 
                         if      (geno == 0) {
                             popPvalues[popId] += log(qv) * 2;

@@ -120,20 +120,6 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
         hasErr = true;
     }
 
-    if (fileLen != expFileLen) {
-        cout << "WARNING: Number of genotypes in bed file doesn't match fam and bim File!\n";
-        cout << "\tFam file has " << numSamples << " samples.  Bim file has "
-        << numBimSnps << " SNPs. Each SNP should have "
-        << snpNumBytes << " bytes.  Expected total " << expFileLen << " bytes.\n";
-        cout << "\tBed file has " << fileLen << " bytes.\n";
-    }
-    else {
-      cout << "\tFam file has " << numSamples << " samples.  Bim file has "
-           << numBimSnps << " SNPs. Each SNP should have "
-           << snpNumBytes << " bytes.  Expected total " << expFileLen << " bytes.\n";
-      cout << "\tBed file has " << fileLen << " bytes.\n";
-    }
-    
     if (hasErr) return hasErr;
     cout << "Reading genotypes from " << bedFile << "\n";
 
@@ -193,5 +179,5 @@ void BedFileSnpGeno::ShowSummary()
     cout << "\n";
     cout << "Total " << numSamples << " samples\n";
     cout << "Total " << numAncSnps << " Ancestry SNPs\n";
-    cout << "Total " << numBimAncSnps << " Ancestry SNPs in bim file\n\n";
+    cout << "Total " << numBimAncSnps << " Ancestry SNPs in bim file\n";
 }
