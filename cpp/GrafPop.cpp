@@ -59,6 +59,9 @@ int main(int argc, char* argv[])
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
     cout << "Read " << numSnpsInAncFile << " SNPs from " << ancSnpFile << "\n";     
 
+    int numSnpsInRefPopFile = ancSnps->ReadRefSubPopSnpsFromFile(refSubPopFile);
+    cout << "Read " << numSnpsInRefPopFile << " SNPs from " << refSubPopFile << "\n"; 
+    
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
 

@@ -31,6 +31,17 @@ AncestrySnps::AncestrySnps()
   refPopNames[2] = "Asian";
   refPopNames[3] = "Mexican";
   refPopNames[4] = "Indian-Pakistani";
+
+  string subPopNames[numSubPops];
+  
+  subPopNames[0] = "chn"; // Chinease, especially Northern Chinese
+  subPopNames[1] = "jpn"; // Japanese
+  subPopNames[2] = "sea"; // Southeast Asian: Thai, Vietnamese, ...
+  
+  for (int popId = 0; popId < numSubPops; popId++) {
+      refSubPopNames[popId] = "ref_" + subPopNames[popId];
+      nomSubPopNames[popId] = "nom_" + subPopNames[popId];
+  }
   
   snps = {};
 }
@@ -161,7 +172,6 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
         vtxPopExpGds[vtxId].a = -1 * popExpPaSums[vtxId]/snpId;
     }
 
-    cout << "Read " << snpId << " ancestry SNPs from file " << ancSnpFile << "\n\n";
     if (0) {
         cout << "Expected vertex genetic distances (#SNPs = " << numAllAncSnps << ")\n";
         for (int vtxId = 0; vtxId < 3; vtxId++) {
@@ -171,6 +181,78 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
             cout << "\t\tEAS: " << vtxPopExpGds[vtxId].a << "\n";
         }
     }
+    
+    return snpId;
+}
+
+int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
+{
+    ASSERT(FileExists(refPopFile.c_str()), "File " << refPopFile << " does not exist!\n");
+    
+    cout << "Reading AFs from file " << refPopFile << "\n";  
+    
+    int snpId = 0;
+    
+    FILE* fp = fopen(refPopFile.c_str(), "r");
+    if (fp == NULL) exit(EXIT_FAILURE);
+    
+    char* line = NULL;
+    size_t len = 0;
+    const string delim = "\t";
+    int rsCol = 3;
+    
+    int numExpCols = 7;
+    string expCols[numExpCols] = {"chr", "pos_37", "pos_38", "rs", "ref", "alt", "UKBBEUR"};
+    
+    // Make sure the file has correct columns
+    bool isRightFile = true;
+    if ((getline(&line, &len, fp)) != -1) {
+        const string header(line);
+        vector<string> vars = SplitString(header, delim);
+        int numVars = vars.size();
+        
+        if (numVars <= numSubPops) {
+            isRightFile = false;
+        }
+        else {
+            for (int i = 0; i < numExpCols; i++) {
+                string var = TrimString(vars[i]);
+
+                if (var != expCols[i]) {
+                    isRightFile = false;
+                    break;
+                }
+            }
+        }
+    }
+    
+    string expColStr = expCols[0];
+    for (int i = 1; i < numExpCols; i++) {
+        expColStr += ", " + expCols[i];
+    }
+    expColStr += " ...";
+    ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (" << expColStr << ")!\n");
+    
+    while ((getline(&line, &len, fp)) != -1) {
+        ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
+        
+        vector<string> vals = SplitString(string(line), delim);
+        int rs = stoi(vals[rsCol]); 
+        ASSERT(rs == snps[snpId].rs, "ERROR in " << refPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
+        
+        float popAfs[numSubPops];
+        for (int i = 0; i < numSubPops; i++) {
+            // TODO: Add code to make sure AF value is a number
+            popAfs[i] = stof(vals[i+ancSnpFileOthCols]);
+        }
+        
+        snps[snpId].SetRefSubPopAfs(popAfs);
+        
+        snpId++;
+    }
+    fclose(fp);
+    
+    if (line) free(line);
     
     return snpId;
 }

@@ -45,8 +45,11 @@ public:
     GenoDist vtxPopExpGds[numVtxPops];
 
     string refPopNames[numRefPops];
-
+    string refSubPopNames[numSubPops];
+    string nomSubPopNames[numSubPops];
+    
     int ReadAncestrySnpsFromFile(string);
+    int ReadRefSubPopSnpsFromFile(string);
     int ReadNomSubPopSnpsFromFile(string);
     int FindSnpIdGivenRs(int);
     int FindSnpIdGivenChrPos(int, int, int, const char*, const char*);

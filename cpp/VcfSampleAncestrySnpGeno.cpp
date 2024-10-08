@@ -185,7 +185,6 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
                             numSamples = numCols;
                             numGenoChars = (numSamples - 1) / 4 + 1; // Save 4 genotypes to one char
                             cout << "\tVcf file has " << numSamples << " samples\n";
-                            cout << "\twill be coded into " << numGenoChars << " chars\n";
                         }
                         else {
                             cout << "\nERROR: vcf file " << vcfFile << " doesn't include samples!\n";
