@@ -20,14 +20,7 @@ void AncestrySnp::SetRefSubPopAfs (float* popAfs)
     // By default, AFs for normalization is the same as reference AFs
     for (int i = 0; i < numSubPops; i++) {
         refSubPopAfs[i] = popAfs[i];
-        nomSubPopAfs[i] = popAfs[i];
     }
-}
-
-void AncestrySnp::SetNomSubPopAf (int popId, float popAf)
-{
-    // When needed, AF for normalization can be set to different value then ref AF
-    nomSubPopAfs[popId] = popAf;
 }
 
 AncestrySnps::AncestrySnps()
@@ -39,17 +32,6 @@ AncestrySnps::AncestrySnps()
   refPopNames[3] = "Mexican";
   refPopNames[4] = "Indian-Pakistani";
   
-  string subPopNames[numSubPops];
-
-  subPopNames[0] = "chn"; // Chinease, especially Northern Chinese
-  subPopNames[1] = "jpn"; // Japanese
-  subPopNames[2] = "sea"; // Southeast Asian: Thai, Vietnamese, ...
-
-  for (int popId = 0; popId < numSubPops; popId++) {
-      refSubPopNames[popId] = "ref_" + subPopNames[popId];
-      nomSubPopNames[popId] = "nom_" + subPopNames[popId];
-  }
-
   snps = {};
 }
 
@@ -193,162 +175,6 @@ int AncestrySnps::ReadAncestrySnpsFromFile(string ancSnpFile)
     return snpId;
 }
 
-int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
-{
-    ASSERT(FileExists(refPopFile.c_str()), "File " << refPopFile << " does not exist!\n");
-
-    cout << "Reading AFs from file " << refPopFile << "\n";  
-    
-    int snpId = 0;
-    
-    FILE* fp = fopen(refPopFile.c_str(), "r");
-    if (fp == NULL) exit(EXIT_FAILURE);
-    
-    char* line = NULL;
-    size_t len = 0;
-    const string delim = "\t";
-    const int rsCol = 3;
-    
-    // Make sure the file has correct columns
-    bool isRightFile = true;
-    if ((getline(&line, &len, fp)) != -1) {
-        const string header(line);
-        vector<string> vars = SplitString(header, delim);
-        int numVars = vars.size();
-
-        if (numVars <= numSubPops) {
-            isRightFile = false;
-        }
-        else if (vars[rsCol] != "rs") {
-            isRightFile = false;
-        }
-        else {
-            for (int i = 0; i < numSubPops; i++) {
-                string var = TrimString(vars[i+1]);
-
-                if (var != refSubPopNames[i]) {
-//                    isRightFile = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    string expCols = "rs";
-    for (int i = 0; i < numSubPops; i++) {
-        expCols += ", " + refSubPopNames[i];
-    }
-    
-    ASSERT(isRightFile, "File " << refPopFile << " does not have expected columns (" << expCols << ")!\n");
-
-    while ((getline(&line, &len, fp)) != -1) {
-        ASSERT(snpId < numAllAncSnps, "File " << refPopFile << " has too many rows!\n");
-      
-        vector<string> vals = SplitString(string(line), delim);
-        int rs = stoi(vals[rsCol]); 
-        ASSERT(rs == snps[snpId].rs, "ERROR in " << refPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
-        
-        float popAfs[numSubPops];
-        for (int i = 0; i < numSubPops; i++) {
-            // TODO: Add code to make sure AF value is a number
-            popAfs[i] = stof(vals[i+ancSnpFileOthCols]);
-        }
-          
-        snps[snpId].SetRefSubPopAfs(popAfs);
-        
-        snpId++;
-    }
-    fclose(fp);
-    
-    if (line) free(line);
-
-    return snpId;
-}
-
-int AncestrySnps::ReadNomSubPopSnpsFromFile(string nomPopFile)
-{
-    ASSERT(FileExists(nomPopFile.c_str()), "File " << nomPopFile << " does not exist!\n");
-    
-    cout << "Reading AFs for normalization from file " << nomPopFile << "\n";  
-    
-    int snpId = 0;
-    
-    FILE* fp = fopen(nomPopFile.c_str(), "r");
-    if (fp == NULL) exit(EXIT_FAILURE);
-    
-    char* line = NULL;
-    size_t len = 0;
-    const string delim = "\t";
-    
-    // Find columns corresponding to each ref population
-    int nomPopColIds[numSubPops];
-    for (int i = 0; i < numSubPops; i++) nomPopColIds[i] = 0;
-
-    bool isRightFile = true;
-    vector<string> vars;
-    int numVars = 0;
-    
-    if ((getline(&line, &len, fp)) != -1) {
-        const string header(line);
-        vars = SplitString(header, delim);
-        numVars = vars.size();
-        
-        if (numVars < 2) {
-            isRightFile = false;
-        }
-        else if (vars[0] != "rs") {
-            isRightFile = false;
-        }
-    }
-
-    ASSERT(isRightFile, "File " << nomPopFile << " does not have expected columns (rs, ...)!\n");
-    
-    int numPopsInFile = 0;
-    
-    for (int i = 0; i < numSubPops; i++) {
-        string expVar = nomSubPopNames[i];      
-        for (int col = 1; col < numVars; col++) {
-            string var = TrimString(vars[col]);
-
-            if (var == expVar) {
-                nomPopColIds[i] = col;
-                numPopsInFile++;
-                break;
-            }
-        }
-    }        
-
-    if (numPopsInFile < 1) {
-        cout << "ERROR: no reference populations are found in " << nomPopFile << "\n";
-    }
-    else {
-        while ((getline(&line, &len, fp)) != -1) {
-            ASSERT(snpId < numAllAncSnps, "File " << nomPopFile << " has too many rows!\n");
-            
-            vector<string> vals = SplitString(string(line), delim);
-            int rs = stoi(vals[0]); 
-            ASSERT(rs == snps[snpId].rs, "ERROR in " << nomPopFile << ": Row #" << snpId << " has rs" << rs << " not " << snps[snpId].rs << "!\n");
-
-            for (int i = 0; i < numSubPops; i++) {
-                int col = nomPopColIds[i];
-
-                if (col > 0) {
-                    float af = stof(vals[col]);
-                    snps[snpId].SetNomSubPopAf(i, af);
-                }
-            }
-            
-            snpId++;
-        }
-    }
-    
-    fclose(fp);
-    
-    if (line) free(line);
-
-    return snpId;
-}
-
 int AncestrySnps::FindSnpIdGivenRs(int rsNum)
 {
     int snpId = -1;
@@ -360,23 +186,41 @@ int AncestrySnps::FindSnpIdGivenRs(int rsNum)
     return snpId;
 }
 
-int AncestrySnps::FindSnpIdGivenChrPos(int chr, int pos, int build)
+int AncestrySnps::FindSnpIdGivenChrPos(int chr, int pos, int build, const char* ref, const char* alt)
 {
     int snpId = -1;
 
     long int chrPos = long(chr) * 1000000000 + pos;
-
-    if (build == 37) {
-        if (pos37ToAncSnpId.find(chrPos) != pos37ToAncSnpId.end()) {
-            snpId = pos37ToAncSnpId[chrPos];
+    
+    if (sizeof(ref) == 8 && sizeof(alt) == 8) {
+        if (build == 37) {
+            if (pos37ToAncSnpId.find(chrPos) != pos37ToAncSnpId.end()) {
+                snpId = pos37ToAncSnpId[chrPos];
+            }
+        }
+        else if (build == 38) {
+            if (pos38ToAncSnpId.find(chrPos) != pos38ToAncSnpId.end()) {
+                snpId = pos38ToAncSnpId[chrPos];
+            }
+        }
+        
+        if (snpId > -1) {
+            char eRef = snps[snpId].ref;
+            char eAlt = snps[snpId].alt;
+            char sRef = ref[0];
+            char sAlt = alt[0];
+            char cRef = FlipAllele(sRef);          
+            char cAlt = FlipAllele(sAlt);
+            
+            if (!( (sRef == eRef && sAlt == eAlt) ||
+                   (sRef == eAlt && sAlt == eRef) ||
+                   (cRef == eRef && cAlt == eAlt) ||
+                   (cRef == eAlt && cAlt == eRef)   ) ) {
+                snpId = -1;
+            }
         }
     }
-    else if (build == 38) {
-        if (pos38ToAncSnpId.find(chrPos) != pos38ToAncSnpId.end()) {
-            snpId = pos38ToAncSnpId[chrPos];
-        }
-    }
-
+    
     return snpId;
 }
 

@@ -19,9 +19,8 @@ private:
     // One record for each putative ancestry SNP (checked using rs ID, Build 37 and 38 positions)
 
     // Saves the two coded alleles (two GT integers like 1/0, 1|1, etc.) for each sample
-    // It is more readable to save the refs and alts in two arrays than in one array
-    vector<vector<char>> vcfAncSnpGtRefs;
-    vector<vector<char>> vcfAncSnpGtAlts;
+    // Four genotypes (8 bits) are saved to one char
+    vector<vector<unsigned char>> vcfAncSnpGtVals;
 
     vector<int> vcfAncSnpChrs;      // chr value from The CHROM string
     vector<int> vcfAncSnpPoss;      // pos value from  POS string
@@ -34,6 +33,8 @@ private:
 
     int totAncSnps;
     int numSamples;
+    int numGenoChars;
+
     int totVcfSnps;
     int putativeAncSnps;
     int numRsIdAncSnps;
@@ -43,7 +44,6 @@ private:
     AncestrySnpType ancSnpType;
 
     void CompareAncestrySnpAlleles(const string, const string, const char, const char, int*, int*);
-    int RecodeGenotypeGivenString(const int, const int, const string);
     int RecodeGenotypeGivenIntegers(const int, const int, const int, const int);
 
 public:
@@ -52,7 +52,7 @@ public:
     // Ancestry SNP ID of each row is saved in the array of vcfAncSnpIds
     vector<string> vcfSamples;
     vector<int> vcfAncSnpIds;
-    vector<char*> vcfAncSnpCodedGenos; // Use char, instead of int, to save space
+    vector<unsigned char*> vcfAncSnpCodedGenos; // Use char, instead of int, to save space
 
     VcfSampleAncestrySnpGeno(string, AncestrySnps*);
     ~VcfSampleAncestrySnpGeno();

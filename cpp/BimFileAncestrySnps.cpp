@@ -70,7 +70,7 @@ int BimFileAncestrySnps::ReadAncestrySnpsFromFile(string bimFile, AncestrySnps* 
 
     filename = bimFile;
 
-    int lineLen = 1048675;
+    int lineLen = 65536;
     char fpLine[lineLen];
 
     FILE *ifp = fopen(bimFile.c_str(), "r");
@@ -81,7 +81,7 @@ int BimFileAncestrySnps::ReadAncestrySnpsFromFile(string bimFile, AncestrySnps* 
     int i;
     int rs, pos;
     char chrStr[128], rsStr[128], cm[64];
-    char refStr[524288], altStr[524288]; // In case there are very, very long refs or alts
+    char refStr[32768], altStr[32768]; // In case there are very, very long refs or alts
 
     // Read the bed file and save lines with potential ancestry SNPs into memory
     vector<int> bimSnpIds;
@@ -104,8 +104,8 @@ int BimFileAncestrySnps::ReadAncestrySnpsFromFile(string bimFile, AncestrySnps* 
         int rsNum = GetRsNumFromString(rsStr);
 
         int rsAncSnpId = ancSnps->FindSnpIdGivenRs(rsNum);
-        int pos37SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 37);
-        int pos38SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 38);
+        int pos37SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 37, refStr, altStr);
+        int pos38SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 38, refStr, altStr);
 
         if (rsAncSnpId > -1 || pos37SnpId > -1 || pos38SnpId > -1) {
             char ref = 0, alt = 0;

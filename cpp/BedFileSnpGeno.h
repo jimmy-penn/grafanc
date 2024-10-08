@@ -29,7 +29,7 @@ public:
     SampleGenoDist *vtxExpGd0;    // Genetic distances from 3 vertices to ref populations when all SNPs have genotypes
 
 public:
-    vector<char*> ancSnpSmpGenos; // Genotypes of Ancestry SNPs in an array of chars (0 = AA, 1 = AB; 2 = BB) of chars
+    vector<unsigned char*> ancSnpSmpGenos; // Genotypes of Ancestry SNPs in an array of chars (0 = AA, 1 = AB; 2 = BB) of chars
     vector<int> ancSnpSnpIds;     // Genotypes of Ancestry SNPs in an array of SNP IDs
 
     BedFileSnpGeno(string, AncestrySnps*, BimFileAncestrySnps*, FamFileSamples*);
@@ -44,7 +44,7 @@ private:
 
     char GetCompAllele(char);
     int  GetSnpGenoInt(bool, bool);
-    char* RecodeBedSnpGeno(char*, int, bool);
+    unsigned char* RecodeBedSnpGeno(char*, bool);
 };
 
 #endif

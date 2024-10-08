@@ -6,8 +6,7 @@ VcfSampleAncestrySnpGeno::VcfSampleAncestrySnpGeno(string file, AncestrySnps *aS
     vcfFile = file;
 
     vcfSamples = {};
-    vcfAncSnpGtRefs = {};
-    vcfAncSnpGtAlts = {};
+    vcfAncSnpGtVals = {};
     vcfAncSnpChrs = {};
     vcfAncSnpPoss = {};
     vcfAncSnpSnps = {};
@@ -56,12 +55,10 @@ void VcfSampleAncestrySnpGeno::DeleteAncSnpCodedGenos()
 
 void VcfSampleAncestrySnpGeno::DeleteAncSnpGtValues()
 {
-    for (int i = 0; i < vcfAncSnpGtRefs.size(); i++) {
-        if (!vcfAncSnpGtRefs[i].empty()) vcfAncSnpGtRefs[i].clear();
-        if (!vcfAncSnpGtAlts[i].empty()) vcfAncSnpGtAlts[i].clear();
+    for (int i = 0; i < vcfAncSnpGtVals.size(); i++) {
+        if (!vcfAncSnpGtVals[i].empty()) vcfAncSnpGtVals[i].clear();
     }
-    vcfAncSnpGtRefs.clear();
-    vcfAncSnpGtAlts.clear();
+    vcfAncSnpGtVals.clear();
 }
 
 bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
@@ -69,6 +66,8 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
     cout << "Reading data from file " << vcfFile << "\n";
     gzFile file = gzopen (vcfFile.c_str(), "r");
 
+    unsigned int charBaseInts[4] = {64, 16, 4, 1};
+    
     int lineNo = 0;
     int numVcfSnps = 0;
     char colValue[WORDLEN];
@@ -79,7 +78,6 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
     vector<string> ids;
     vector<string> refs;
     vector<string> alts;
-    vector<vector<int>> snpGenoVals;
 
     colValue[0] = 0;
     int valPos = 0;
@@ -115,6 +113,10 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
             }
         }
 
+        // Read vcf file line by line, finding sample set from #CHROM row, then reading SNP genotype from the rest rows.
+        // Different from the PLINK set, from which ancestry SNPs and their alleles can be determined by checking the .bim file,
+        // vcf file stores all information in one file. We have to read and save the genotypes of potential ancestry SNPs first,
+        // and determine which genome build to use and flip the alleles later, in order to avoid opening the large file again.
         int buffPos = 0;
         while (buffPos < bytesRead) {
             bool isNewLine = false;
@@ -181,7 +183,9 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
                         if (numCols > 0) {
                             for (int smpNo = 0; smpNo < numCols; smpNo++) vcfSamples.push_back(snpGts[smpNo]);
                             numSamples = numCols;
+                            numGenoChars = (numSamples - 1) / 4 + 1; // Save 4 genotypes to one char
                             cout << "\tVcf file has " << numSamples << " samples\n";
+                            cout << "\twill be coded into " << numGenoChars << " chars\n";
                         }
                         else {
                             cout << "\nERROR: vcf file " << vcfFile << " doesn't include samples!\n";
@@ -212,9 +216,12 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
                     try { pos = stoi(posStr); }
                     catch (exception &err) { pos = 0; }
 
+                    const char* gRef = refStr.c_str();
+                    const char* gAlt = altStr.c_str();
+                    
                     int rsSnpId = ancSnps->FindSnpIdGivenRs(rsNum);
-                    int gb37SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 37);
-                    int gb38SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 38);
+                    int gb37SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 37, gRef, gAlt);
+                    int gb38SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 38, gRef, gAlt);
 
                     if (isGt && (rsSnpId > -1 || gb37SnpId > -1 || gb38SnpId > -1)) {
                         putativeAncSnps++;
@@ -231,24 +238,41 @@ bool VcfSampleAncestrySnpGeno::ReadDataFromFile()
                         vcfRsIdAncSnpIds.push_back(rsSnpId);
                         vcfGb37AncSnpIds.push_back(gb37SnpId);
                         vcfGb38AncSnpIds.push_back(gb38SnpId);
-
-                        vector<char> gtRefs;
-                        vector<char> gtAlts;
-                        for (int i = 0; i < numCols; i++) {
-                            string gtStr = snpGts[i];
-                            int gtLen = gtStr.length();
-                            char gRef = 0, gAlt = 0;
-                            if (gtLen > 2 && (gtStr[1] == '|' || gtStr[1] == '/')) {
-                                gRef = gtStr[0];
-                                gAlt = gtStr[2];
+                        
+                        vector<unsigned char> gtVals;
+                        for (int charNo = 0; charNo < numGenoChars; charNo++) {
+                            unsigned char charGeno = 0;
+                          
+                            for (int charGenoNo = 0; charGenoNo < 4; charGenoNo++) {
+                                int smpNo = charNo * 4 + charGenoNo;
+                                if (smpNo < numSamples) {
+                                    string gtStr = snpGts[smpNo];
+                                    int gtLen = gtStr.length();
+                                    unsigned char numAlts = 3;
+                                    if (gtLen > 2 && (gtStr[1] == '|' || gtStr[1] == '/')) {
+                                        char refGeno = gtStr[0];
+                                        char altGeno = gtStr[2];
+                                        if (refGeno == '0' && altGeno == '0') {
+                                            numAlts = 0;
+                                        }
+                                        else if (refGeno == '0' && altGeno == '1') {
+                                            numAlts = 1;
+                                        }
+                                        else if (refGeno == '1' && altGeno == '0') {
+                                            numAlts = 1;
+                                        }
+                                        else if (refGeno == '1' && altGeno == '1') {
+                                            numAlts = 2;
+                                        }
+                                    }
+                                    charGeno += numAlts * charBaseInts[charGenoNo];
+                                }
                             }
-
-                            gtRefs.push_back(gRef);
-                            gtAlts.push_back(gAlt);
+                            
+                            gtVals.push_back(charGeno);
                         }
 
-                        vcfAncSnpGtRefs.push_back(gtRefs);
-                        vcfAncSnpGtAlts.push_back(gtAlts);
+                        vcfAncSnpGtVals.push_back(gtVals);
                     }
 
                     numVcfSnps++;
@@ -294,6 +318,14 @@ void VcfSampleAncestrySnpGeno::RecodeSnpGenotypes()
     int saveSnpNo = 0; // Putative SNPs saved after vcf file was read
     int ancSnpNo = 0;  // Final list of ancestry SNPs to be used for ancestry inference
 
+    unsigned int charBaseInts[4] = {64, 16, 4, 1};
+    unsigned int baseNums[8];
+    unsigned int base = 1;
+    for (int i = 0; i < 8; i++) {
+        baseNums[i] = base;
+        base = base << 1;
+    }
+    
     for (saveSnpNo = 0; saveSnpNo < putativeAncSnps; saveSnpNo++) {
         int ancSnpId = -1;
         if      (ancSnpType == AncestrySnpType::RSID) ancSnpId = vcfRsIdAncSnpIds[saveSnpNo];
@@ -313,16 +345,38 @@ void VcfSampleAncestrySnpGeno::RecodeSnpGenotypes()
             CompareAncestrySnpAlleles(vcfRef, vcfAlt, eRef, eAlt, &expRefIdx, &expAltIdx);
 
             if (expRefIdx > -1 && expAltIdx > -1) {
-                char* smpGenos = new char[numSamples];
-                vector<char> gtRefVal = vcfAncSnpGtRefs[saveSnpNo];
-                vector<char> gtAltVal = vcfAncSnpGtAlts[saveSnpNo];
+                unsigned char* smpGenos = new unsigned char[numGenoChars];
+                vector<unsigned char> gtVal = vcfAncSnpGtVals[saveSnpNo];
 
-                for (int smpNo = 0; smpNo < numSamples; smpNo++) {
-                    int refGval = gtRefVal[smpNo] - '0';
-                    int altGval = gtAltVal[smpNo] - '0';
-                    char geno = RecodeGenotypeGivenIntegers(expRefIdx, expAltIdx, refGval, altGval);
-                    smpGenos[smpNo] = geno;
+                for (int charNo = 0; charNo < numGenoChars; charNo++) {
+                    int charGtVal = int(gtVal[charNo]);
+                    int charGeno = 0;
+                    
+                    for (int cGenoNo = 0; cGenoNo < 4; cGenoNo++) {
+                        int smpNo = charNo * 4 + cGenoNo;
+                        if (smpNo < numSamples) {
+                            int numVcfAlts = charGtVal / charBaseInts[cGenoNo];
+                            charGtVal -= numVcfAlts * charBaseInts[cGenoNo];
+
+                            char geno = 3;                            
+
+                            if (expAltIdx == 1) {
+                                geno = numVcfAlts; 
+                            }
+                            else if (expAltIdx == 0) {
+                                geno = numVcfAlts; 
+                                if (numVcfAlts < 3) {
+                                    geno = 2 - numVcfAlts;
+                                }
+                            }
+
+                            charGeno += geno * charBaseInts[cGenoNo];
+                        }
+                    }
+                    
+                    smpGenos[charNo] = charGeno;
                 }
+                
                 vcfAncSnpIds.push_back(ancSnpId);
                 vcfAncSnpCodedGenos.push_back(smpGenos);
                 ancSnpNo++;
@@ -334,10 +388,10 @@ void VcfSampleAncestrySnpGeno::RecodeSnpGenotypes()
 }
 
 void VcfSampleAncestrySnpGeno::CompareAncestrySnpAlleles(const string refStr, const string altsStr,
-const char eRef, const char eAlt, int* expRefIdx, int* expAltIdx)
+                                    const char eRef, const char eAlt, int* expRefIdx, int* expAltIdx)
 {
     // Let index of the ref alleles in vcf be 0, and indices of alts be 1, 2, 3, ...
-	// Check them to find which one is the expected ref and and which is alt for the Ancestry SNP
+	  // Check them to find which one is the expected ref and and which is alt for the Ancestry SNP
     *expRefIdx = -1;
     *expAltIdx = -1;
 
@@ -366,7 +420,7 @@ const char eRef, const char eAlt, int* expRefIdx, int* expAltIdx)
             for (int altNo = 0; altNo < numAlts; altNo++) {
                 string altWord = altWords[altNo];
                 int alleleIdx = altNo + 1;  // allele index starts from 0 = ref, then 1 = first alt, ...
-	            if (altWord.length() == 1) {
+	              if (altWord.length() == 1) {
                     char alt = altWord[0];
                     if (flip)  alt = FlipAllele(alt);
 
@@ -378,41 +432,26 @@ const char eRef, const char eAlt, int* expRefIdx, int* expAltIdx)
     }
 }
 
-int VcfSampleAncestrySnpGeno::RecodeGenotypeGivenString(const int expRefIdx, const int expAltIdx, const string genoStr)
-{
-    int genoInt = 3;
-
-    if (genoStr.length() == 3 && (genoStr[1] == '|' || genoStr[1] == '/') && expRefIdx > -1 && expAltIdx > -1) {
-        int g1Num = genoStr[0] - '0';
-        int g2Num = genoStr[2] - '0';
-        genoInt = RecodeGenotypeGivenIntegers(expRefIdx, expAltIdx, g1Num, g2Num);
-    }
-
-    cout << "exp " << expRefIdx << expAltIdx << " geno " << genoStr << " => " << genoInt << "\n";
-
-    return genoInt;
-}
-
 int VcfSampleAncestrySnpGeno::RecodeGenotypeGivenIntegers(const int expRefIdx, const int expAltIdx, const int g1Num, const int g2Num)
 {
     int genoInt = 3; // number of alt alleles, valid counts are 0, 1, 2
-
+    
     // Genotype is valid only if both alleles are valid, i.e., same as one of the expected alleles
     int numValidGenos = 0;
     int numAlts = 0;
-
+    
     if (g1Num == expRefIdx || g1Num == expAltIdx) {
         numValidGenos++;
         if (g1Num == expAltIdx) numAlts++;
     }
-
+    
     if (g2Num == expRefIdx || g2Num == expAltIdx) {
         numValidGenos++;
         if (g2Num == expAltIdx) numAlts++;
     }
-
+    
     if (numValidGenos == 2) genoInt = numAlts;
-
+    
     return genoInt;
 }
 

@@ -6,7 +6,7 @@
 static const int numAllAncSnps = 282424;
 static const int numRefPops = 5;
 static const int numVtxPops = 3;
-static const int numSubPops = 25;
+static const int numSubPops = 29;
 static const int ancSnpFileOthCols = 6;
 
 class AncestrySnp
@@ -22,13 +22,11 @@ public:
     float vtxPopAfs[numVtxPops];    // E, F, A, or EUR, AFR, EAS
     float refPopAfs[numRefPops];    // EUR, AFA, ASN, LAT, SAS
     float refSubPopAfs[numSubPops]; // Other reference subcontinental populations
-    float nomSubPopAfs[numSubPops]; // Smaller groups used for normalization
-    
+
 public:
     AncestrySnp(int, int, int, int, int, char, char, float*, float*);
   
     void SetRefSubPopAfs(float*);
-    void SetNomSubPopAf(int, float);
 };
 
 class AncestrySnps
@@ -47,14 +45,11 @@ public:
     GenoDist vtxPopExpGds[numVtxPops];
 
     string refPopNames[numRefPops];
-    string refSubPopNames[numSubPops];
-    string nomSubPopNames[numSubPops];
-    
+
     int ReadAncestrySnpsFromFile(string);
-    int ReadRefSubPopSnpsFromFile(string);
     int ReadNomSubPopSnpsFromFile(string);
     int FindSnpIdGivenRs(int);
-    int FindSnpIdGivenChrPos(int, int, int);
+    int FindSnpIdGivenChrPos(int, int, int, const char*, const char*);
     AncestrySnp GetAncestrySnp(int);
     void SetVertexExpecteGeneticDists();
     int GetNumAncestrySnps() { return snps.size(); };

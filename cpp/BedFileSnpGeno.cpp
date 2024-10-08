@@ -47,18 +47,24 @@ char BedFileSnpGeno::GetCompAllele(char a)
     return c;
 }
 
-char* BedFileSnpGeno::RecodeBedSnpGeno(char *snpBedGenos, int numBytes, bool swap)
+unsigned char* BedFileSnpGeno::RecodeBedSnpGeno(char *snpBedGenos, bool swap)
 {
-    char *snpGenos = new char[numSamples]; // char only takes one byte
-    for (int i = 0; i < numSamples; i++) snpGenos[i] = 3;
+    int numBytes = (numSamples - 1) / 4 + 1;
+  
+    unsigned char *snpGenos = new unsigned char[numBytes]; // char only takes one byte
+    for (int i = 0; i < numBytes; i++) snpGenos[i] = 255;
 
     int smpNo = 0;
     int byteNo = 0;
 
+    // So that 01 01 11 10 = 1 * 64 + 1 * 16 + 3 * 4 + 2 = 94
+    unsigned int charBaseInts[4] = {64, 16, 4, 1};
+    
     for (byteNo = 0; byteNo < numBytes; byteNo++) {
         char genoByte = snpBedGenos[byteNo];
-        int val = int(genoByte);
 
+        unsigned int chrIntGeno = 0; // One char stores genotypes of 4 samples
+        
         for (int byteSmpNo = 0; byteSmpNo < 4; byteSmpNo++) {
             int bit1Pos = byteSmpNo * 2;
             int bit2Pos = bit1Pos + 1;;
@@ -66,7 +72,7 @@ char* BedFileSnpGeno::RecodeBedSnpGeno(char *snpBedGenos, int numBytes, bool swa
             int bit1 = genoByte & baseNums[bit1Pos];
             int bit2 = genoByte & baseNums[bit2Pos];
 
-            int intGeno = 3;
+            unsigned int intGeno = 3;
             if      ( bit1 &&  bit2) intGeno = 2;
             else if (!bit1 &&  bit2) intGeno = 1;
             else if (!bit1 && !bit2) intGeno = 0;
@@ -76,9 +82,11 @@ char* BedFileSnpGeno::RecodeBedSnpGeno(char *snpBedGenos, int numBytes, bool swa
                 else if (intGeno == 2) intGeno = 0;
             }
 
-            if (smpNo < numSamples) snpGenos[smpNo] = intGeno;
+            chrIntGeno += charBaseInts[byteSmpNo] * intGeno;
             smpNo++;
         }
+        
+        snpGenos[byteNo] = chrIntGeno;
     }
 
     return snpGenos;
@@ -93,7 +101,7 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
 
     ifstream bedFilePtr (bedFile, ios::in | ios::binary);
 
-    long snpNumBytes = (numSamples - 1) / 4 + 1;
+    int snpNumBytes = (numSamples - 1) / 4 + 1;
     long expFileLen = snpNumBytes * numBimSnps + 3;
 
     bedFilePtr.seekg (0, bedFilePtr.end);
@@ -113,14 +121,19 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     }
 
     if (fileLen != expFileLen) {
-        cout << "ERROR: Number of genotypes in bed file doesn't match fam and bim File!\n";
+        cout << "WARNING: Number of genotypes in bed file doesn't match fam and bim File!\n";
         cout << "\tFam file has " << numSamples << " samples.  Bim file has "
         << numBimSnps << " SNPs. Each SNP should have "
         << snpNumBytes << " bytes.  Expected total " << expFileLen << " bytes.\n";
         cout << "\tBed file has " << fileLen << " bytes.\n";
-        hasErr = true;
     }
-
+    else {
+      cout << "\tFam file has " << numSamples << " samples.  Bim file has "
+           << numBimSnps << " SNPs. Each SNP should have "
+           << snpNumBytes << " bytes.  Expected total " << expFileLen << " bytes.\n";
+      cout << "\tBed file has " << fileLen << " bytes.\n";
+    }
+    
     if (hasErr) return hasErr;
     cout << "Reading genotypes from " << bedFile << "\n";
 
@@ -138,7 +151,7 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
             for (int j = 0; j < snpNumBytes; j++) snpGenoStr[j] = buff[j];
             ASSERT(bimAncSnpNo < numAncSnps, "bim ancestry SNP ID " << bimAncSnpNo << " not less than " << numAncSnps << "\n");
 
-            char *snpSmpGeno = RecodeBedSnpGeno(snpGenoStr, snpNumBytes, swap);
+            unsigned char *snpSmpGeno = RecodeBedSnpGeno(snpGenoStr, swap);
 
             ancSnpSmpGenos.push_back(snpSmpGeno);
             ancSnpSnpIds.push_back(ancSnpId);

@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     "\n *  GrafAnc: Software to infer subject ancestry from genotypes quickly"
     "\n *  Yumi (Jimmy) Jin, PhD"
     "\n *  Jimmy.Jin@Pennmedicine.upenn.edu"
-    "\n *  08/27/2024"
+    "\n *  10/08/2024"
     "\n *"
     "\n *===========================================================================";
 
@@ -59,22 +59,11 @@ int main(int argc, char* argv[])
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
     cout << "Read " << numSnpsInAncFile << " SNPs from " << ancSnpFile << "\n";     
 
-    int numSnpsInRefPopFile = ancSnps->ReadRefSubPopSnpsFromFile(refSubPopFile);
-    cout << "Read " << numSnpsInRefPopFile << " SNPs from " << refSubPopFile << "\n"; 
-
-    if (FileExists(nomSubPopFile.c_str())) {
-        int numSnpsInNomPopFile = ancSnps->ReadNomSubPopSnpsFromFile(nomSubPopFile);
-        cout << "Read " << numSnpsInNomPopFile << " SNPs from " << nomSubPopFile << "\n"; 
-    }
-    
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
 
     int numThreads = thread::hardware_concurrency();
     numThreads--;
-
-// Testing 
-//numThreads = 1;
 
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
 
@@ -126,15 +115,18 @@ int main(int argc, char* argv[])
 
         BimFileAncestrySnps *bimSnps = new BimFileAncestrySnps(totAncSnps);
         bimSnps->ReadAncestrySnpsFromFile(bimFile, ancSnps);
+        
         int numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
+
         bimSnps->ShowSummary();
 
         if (smpGenoAnc->HasEnoughAncestrySnps(numBimAncSnps)) {
             BedFileSnpGeno *bedGenos = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
+          
             bool hasErr = bedGenos->ReadGenotypesFromBedFile();
             if (hasErr) return 0;
             bedGenos->ShowSummary();
-
+            
             smpGenoAnc->SetSnpGenoData(&bedGenos->ancSnpSnpIds, &bedGenos->ancSnpSmpGenos);
         }
         else {
