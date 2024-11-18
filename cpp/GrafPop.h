@@ -5,7 +5,7 @@ using namespace std;
 
 #include "Util.h"
 #include "AncestrySnps.h"
-#include "VcfSampleAncestrySnpGeno.h"
+#include "VcfGrafAncSnpGeno.h"
 #include "FamFileSamples.h"
 #include "BimFileAncestrySnps.h"
 #include "BedFileSnpGeno.h"
@@ -13,6 +13,9 @@ using namespace std;
 #include "SampleGenoAncestry.h"
 #include <thread>
 #include <mutex>
+
+#include "htslib/hts.h"
+#include "htslib/vcf.h"
 
 #if defined(__sun)
 #define PROC_SELF_EXE "/proc/self/path/a.out"

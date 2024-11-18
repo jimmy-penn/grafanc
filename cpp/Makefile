@@ -3,7 +3,7 @@ INCLUDES = -I. -I$(BASEDIR)
 
 #------ Compiler and options -----------------
 CXX = /usr/bin/g++
-CXXFLAGS = -std=c++11 -pthread -g -lm -lz $(INCLUDES)
+CXXFLAGS = -std=c++11 -pthread -g -lm -lz $(INCLUDES) -I /applications/htslib/1.20/ -L /applications/htslib/1.20/lib -lhts -lstdc++
 
 HDIR = ./
 SRCDIR = ./
@@ -17,7 +17,7 @@ SRCDIR = ./
 
 #----- File Dependencies ----------------------
 
-SRC = Util.cpp AncestrySnps.cpp VcfSampleAncestrySnpGeno.cpp FamFileSamples.cpp BimFileAncestrySnps.cpp BedFileSnpGeno.cpp SampleGenoDist.cpp SampleGenoAncestry.cpp  GrafPop.cpp
+SRC = Util.cpp AncestrySnps.cpp VcfGrafAncSnpGeno.cpp FamFileSamples.cpp BimFileAncestrySnps.cpp BedFileSnpGeno.cpp SampleGenoDist.cpp SampleGenoAncestry.cpp  GrafPop.cpp
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
@@ -28,8 +28,8 @@ Util.o: $(HDIR)Util.h
 	$(CXX) $(CXXFLAGS) -c Util.cpp
 AncestrySnps.o: $(HDIR)AncestrySnps.h
 	$(CXX) $(CXXFLAGS) -c AncestrySnps.cpp
-VcfSampleAncestrySnpGeno.o: $(HDIR)VcfSampleAncestrySnpGeno.h
-	$(CXX) $(CXXFLAGS) -c VcfSampleAncestrySnpGeno.cpp
+VcfGrafAncSnpGeno.o: $(HDIR)VcfGrafAncSnpGeno.h
+	$(CXX) $(CXXFLAGS) -c VcfGrafAncSnpGeno.cpp
 FamFileSamples.o: $(HDIR)FamFileSamples.h
 	$(CXX) $(CXXFLAGS) -c FamFileSamples.cpp
 BimFileAncestrySnps.o: $(HDIR)BimFileAncestrySnps.h

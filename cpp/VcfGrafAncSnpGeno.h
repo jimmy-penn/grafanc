@@ -1,27 +1,20 @@
-#ifndef VCF_SAMPLE_ANCESTRY_SNP_GENO_H
-#define VCF_SAMPLE_ANCESTRY_SNP_GENO_H
+#ifndef VCF_GRAFANC_SNP_GENO_H
+#define VCF_GRAFANC_SNP_GENO_H
 
 #include <zlib.h>
 #include <errno.h>
-#include "Util.h"
+#include "htslib/hts.h"
+#include "htslib/vcf.h"
 #include "AncestrySnps.h"
 
-#define BUFFERLEN 0x0010
-#define WORDLEN 10000
-
-class VcfSampleAncestrySnpGeno
+class VcfGrafAncSnpGeno
 {
 private:
     string vcfFile;
     AncestrySnps *ancSnps;
-
-    // For all the following arrays:
-    // One record for each putative ancestry SNP (checked using rs ID, Build 37 and 38 positions)
-
-    // Saves the two coded alleles (two GT integers like 1/0, 1|1, etc.) for each sample
-    // Four genotypes (8 bits) are saved to one char
+    
     vector<vector<unsigned char>> vcfAncSnpGtVals;
-
+    
     vector<int> vcfAncSnpChrs;      // chr value from The CHROM string
     vector<int> vcfAncSnpPoss;      // pos value from  POS string
     vector<string> vcfAncSnpSnps;   // The ID string
@@ -30,22 +23,23 @@ private:
     vector<int> vcfRsIdAncSnpIds;   // Ancestry SNP ID derived using RS ID
     vector<int> vcfGb37AncSnpIds;   // Ancestry SNP ID derived using Build 37 chr + pos
     vector<int> vcfGb38AncSnpIds;   // Ancestry SNP ID derived using Build 38 chr + pos
-
+  
     int totAncSnps;
     int numSamples;
     int numGenoChars;
-
+  
     int totVcfSnps;
     int putativeAncSnps;
     int numRsIdAncSnps;
     int numGb37AncSnps;
     int numGb38AncSnps;
-    int numVcfAncSnps;
+    int numVcfAncSnps;    
+  
     AncestrySnpType ancSnpType;
-
+    
     void CompareAncestrySnpAlleles(const string, const string, const char, const char, int*, int*);
     int RecodeGenotypeGivenIntegers(const int, const int, const int, const int);
-
+    
 public:
     // Each enotype (per SNP and sample) is coded with number of alts, i.e., 0 = RR, 1 = RA, 2 = AA, 3 = unknown
     // Each row in the array is the genotypes of one SNP, coded as  an array of integers for all samples
@@ -53,16 +47,16 @@ public:
     vector<string> vcfSamples;
     vector<int> vcfAncSnpIds;
     vector<unsigned char*> vcfAncSnpCodedGenos; // Use char, instead of int, to save space
-
-    VcfSampleAncestrySnpGeno(string, AncestrySnps*);
-    ~VcfSampleAncestrySnpGeno();
-
+    
+    VcfGrafAncSnpGeno(string, AncestrySnps*);
+    ~VcfGrafAncSnpGeno();
+    
     int GetNumVcfSnps() { return totVcfSnps; };
     int GetNumSamples() { return numSamples; };
     int GetNumVcfAncestrySnps() { return numVcfAncSnps; };
     bool ReadDataFromFile();
     void RecodeSnpGenotypes();
-
+    
     void ShowSummary();
     void DeleteAncSnpGtValues();
     void DeleteAncSnpCodedGenos();

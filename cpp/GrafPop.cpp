@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     smpGenoAnc->CalculateSubPopGd0Values();
 
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
-        VcfSampleAncestrySnpGeno *vcfGeno = new VcfSampleAncestrySnpGeno(genoDs, ancSnps);
+         VcfGrafAncSnpGeno *vcfGeno = new VcfGrafAncSnpGeno(genoDs, ancSnps);
         bool dataRead = vcfGeno->ReadDataFromFile();
         if (!dataRead) {
             cout << "\nFailed to read genotype data from " << genoDs << "\n\n";
