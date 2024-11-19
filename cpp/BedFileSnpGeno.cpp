@@ -16,8 +16,11 @@ BedFileSnpGeno::BedFileSnpGeno(string bFile, AncestrySnps *aSnps, BimFileAncestr
     numAncSnps = ancSnps->GetNumAncestrySnps();
     numBimSnps = bimSnps->GetNumBimSnps();
     numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
-    numSamples = famSmps->GetNumFamSamples();
-
+    numFamSamples = famSmps->GetNumFamSamples();
+    
+    numSamples = numFamSamples;
+    startSmpNo = 0;
+    
     ancSnpSmpGenos = {};
     ancSnpSnpIds = {};
 
@@ -34,6 +37,18 @@ BedFileSnpGeno::~BedFileSnpGeno()
     }
     ancSnpSmpGenos.clear();
     ancSnpSnpIds.clear();
+}
+
+bool BedFileSnpGeno::SelectFamSampleIds(int stSmpNo, int numSmps)
+{
+    assert(stSmpNo % 4 == 0); // Read 4 sample genos each time and save them to one byte
+    assert(stSmpNo >= 0);
+    assert(stSmpNo + numSmps <= numFamSamples);
+    
+    startSmpNo = stSmpNo;
+    numSamples = numSmps;
+    
+    return true;
 }
 
 char BedFileSnpGeno::GetCompAllele(char a)
@@ -101,8 +116,13 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
 
     ifstream bedFilePtr (bedFile, ios::in | ios::binary);
 
-    int snpNumBytes = (numSamples - 1) / 4 + 1;
-    long expFileLen = snpNumBytes * numBimSnps + 3;
+    int snpTotBytes = (numFamSamples - 1) / 4 + 1; // Bytes read from bed file for each SNP
+    int snpNumBytes = (numSamples - 1) / 4 + 1;    // Bytes needed to code sample genos to be analyzed
+    
+    // Check if not all samples are to be analyzed
+    bool notAllSmps = numSamples < numFamSamples ? true : false;
+    
+    long expFileLen = snpTotBytes * numBimSnps + 3;
 
     bedFilePtr.seekg (0, bedFilePtr.end);
     long fileLen = bedFilePtr.tellg();
@@ -123,24 +143,32 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     if (hasErr) return hasErr;
     cout << "Reading genotypes from " << bedFile << "\n";
 
-    char buff[snpNumBytes];             // Reusable memory to keep the genotypes
+    char buff[snpTotBytes];             // Reusable memory to keep the genotypes
     int bimAncSnpNo = 0;
-
+    
     for (int i = 0; i < numBimSnps; i++) {
-        bedFilePtr.read (buff, snpNumBytes);
+        bedFilePtr.read (buff, snpTotBytes);
         int ancSnpId = bimSnps->GetAncSnpIdGivenBimSnpPos(i);
         int match = bimSnps->GetAlleleMatchGivenBimSnpPos(i);
         bool swap = match ==  2 || match == -2 ? true : false;
 
         if (ancSnpId >= 0) {
             char* snpGenoStr = new char[snpNumBytes];
-            for (int j = 0; j < snpNumBytes; j++) snpGenoStr[j] = buff[j];
+            if (notAllSmps) {
+                int startByteNo = startSmpNo / 4;
+                for (int k = 0; k < snpNumBytes; k++) snpGenoStr[k] = buff[k+startByteNo];
+            }
+            else 
+                for (int j = 0; j < snpTotBytes; j++) snpGenoStr[j] = buff[j];
+            
             ASSERT(bimAncSnpNo < numAncSnps, "bim ancestry SNP ID " << bimAncSnpNo << " not less than " << numAncSnps << "\n");
 
             unsigned char *snpSmpGeno = RecodeBedSnpGeno(snpGenoStr, swap);
 
             ancSnpSmpGenos.push_back(snpSmpGeno);
             ancSnpSnpIds.push_back(ancSnpId);
+            
+            delete snpGenoStr;
 
             bimAncSnpNo++;
         }

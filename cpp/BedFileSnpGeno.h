@@ -18,10 +18,13 @@ public:
     unsigned long baseNums[64];    // bits 1, 10, 100 ... for decoding genos in bed file
 
     int numAncSnps;
-    int numSamples;
     int numBimSnps;
     int numBimAncSnps;
-
+    
+    int numFamSamples;
+    int numSamples;
+    int startSmpNo;
+    
     string bedFile;
     AncestrySnps *ancSnps;
     BimFileAncestrySnps *bimSnps;
@@ -34,10 +37,12 @@ public:
 
     BedFileSnpGeno(string, AncestrySnps*, BimFileAncestrySnps*, FamFileSamples*);
     ~BedFileSnpGeno();
+    
     bool ReadGenotypesFromBedFile();
     void ShowSummary();
     void InitPopPvalues();
-
+    bool SelectFamSampleIds(int, int);
+    
 private:
     int genoFileLineLen;         // Max length of one sample geno line (with sample info)
     int smpNameLen;

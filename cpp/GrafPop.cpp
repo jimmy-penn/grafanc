@@ -112,7 +112,14 @@ int main(int argc, char* argv[])
         FamFileSamples *famSmps = new FamFileSamples(famFile);
         famSmps->ShowSummary();
 
-        smpGenoAnc->SetGenoSamples(famSmps->samples);
+        // smpGenoAnc->SetGenoSamples(famSmps->samples);
+        vector<FamSample> chkSmps;
+        int stSmpNo = 0;
+        int numChkSmps = famSmps->GetNumFamSamples();
+        
+        for (int i = stSmpNo; i < stSmpNo+numChkSmps; i++) chkSmps.push_back(famSmps->samples[i]);
+        smpGenoAnc->SetGenoSamples(chkSmps);
+        
         int numSmps = smpGenoAnc->GetNumSamples();
 
         BimFileAncestrySnps *bimSnps = new BimFileAncestrySnps(totAncSnps);
@@ -123,13 +130,14 @@ int main(int argc, char* argv[])
         bimSnps->ShowSummary();
 
         if (smpGenoAnc->HasEnoughAncestrySnps(numBimAncSnps)) {
-            BedFileSnpGeno *bedGenos = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
+            BedFileSnpGeno *bedGeno = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
+            bedGeno->SelectFamSampleIds(stSmpNo, numChkSmps);
           
-            bool hasErr = bedGenos->ReadGenotypesFromBedFile();
+            bool hasErr = bedGeno->ReadGenotypesFromBedFile();
             if (hasErr) return 0;
-            bedGenos->ShowSummary();
+            bedGeno->ShowSummary();
             
-            smpGenoAnc->SetSnpGenoData(&bedGenos->ancSnpSnpIds, &bedGenos->ancSnpSmpGenos);
+            smpGenoAnc->SetSnpGenoData(&bedGeno->ancSnpSnpIds, &bedGeno->ancSnpSmpGenos);
         }
         else {
             cout << "Ancestry inference not done due to lack of genotyped ancestry SNPs.\n\n";
