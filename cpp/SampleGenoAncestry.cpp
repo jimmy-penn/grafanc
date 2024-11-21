@@ -100,7 +100,7 @@ void SampleGenoAncestry::SetSnpGenoData(vector<int> *snpIds, vector<unsigned cha
 int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
 {
     int numSaveSmps = 0;
-    for (int i = 0; i < numSamples; i++) {
+    for (int i = 0; i < samples.size(); i++) {
         if (samples[i].ancIsSet) numSaveSmps++;
     }
 
@@ -161,7 +161,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             fprintf(ifp, "%s\n", line);
         }
 
-        for (int i = 0; i < numSamples; i++) {
+        for (int i = 0; i < numSaveSmps; i++) {
             GenoSample smp = samples[i];
             if (!smp.ancIsSet) continue;
 

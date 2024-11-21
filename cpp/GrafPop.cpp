@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
     FamFileSamples *famSmps = NULL;
     BedFileSnpGeno *bedGeno = NULL;
     BimFileAncestrySnps *bimSnps = NULL;
+    int numBimAncSnps = 0;
     
     int numDsSamples = 0;
     string fileTypeStr = "";
@@ -109,6 +110,13 @@ int main(int argc, char* argv[])
         famSmps = new FamFileSamples(famFile);
         famSmps->ShowSummary();
         
+        bimSnps = new BimFileAncestrySnps(totAncSnps);
+        bimSnps->ReadAncestrySnpsFromFile(bimFile, ancSnps);
+        
+        numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
+        
+        bimSnps->ShowSummary();
+        
         numDsSamples = famSmps->GetNumFamSamples();
         fileTypeStr = "PLINK";
     }
@@ -124,7 +132,7 @@ int main(int argc, char* argv[])
     cout << totAllocMem << " MiB memory can be allocated\n";
     
     float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
-    
+
     //// Determine how many rounds are needed for analyzing all samples
     int memNeeded = int( (numDsSamples/1000) * (totAncSnps/1000) / genosPerByte );
 
@@ -194,30 +202,21 @@ int main(int argc, char* argv[])
                 return 0;
             }
     
-            //smpGenoAnc->SetGenoSamples(famSmps->samples);
-        
             vector<FamSample> chkSmps;
             int stSmpNo = round * smpSegSize;
             int numChkSmps = smpSegSize;
+            if (stSmpNo + numChkSmps > numDsSamples) numChkSmps = numDsSamples - stSmpNo;
     
             for (int i = stSmpNo; i < stSmpNo+numChkSmps; i++) chkSmps.push_back(famSmps->samples[i]);
             
             smpGenoAnc->SetGenoSamples(chkSmps);
             
             int numSmps = smpGenoAnc->GetNumSamples();
-            
-            bimSnps = new BimFileAncestrySnps(totAncSnps);
-            bimSnps->ReadAncestrySnpsFromFile(bimFile, ancSnps);
-    
-            int numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
-    
-            bimSnps->ShowSummary();
-            
+
             if (smpGenoAnc->HasEnoughAncestrySnps(numBimAncSnps)) {
                 bedGeno = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
                 hasBedGeno = true;
     
-                //// Testing  
                 bedGeno->SelectFamSampleIds(stSmpNo, numChkSmps);
                 bool hasErr = bedGeno->ReadGenotypesFromBedFile();
                 
