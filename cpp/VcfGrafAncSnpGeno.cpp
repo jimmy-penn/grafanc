@@ -4,7 +4,7 @@ VcfGrafAncSnpGeno::VcfGrafAncSnpGeno(string file, AncestrySnps *aSnps)
 {
     ancSnps = aSnps;
     vcfFile = file;
-    
+
     vcfSamples = {};
     vcfAncSnpGtVals = {};
     vcfAncSnpChrs = {};
@@ -17,8 +17,9 @@ VcfGrafAncSnpGeno::VcfGrafAncSnpGeno(string file, AncestrySnps *aSnps)
     vcfGb38AncSnpIds = {};
     vcfAncSnpCodedGenos = {};
     vcfAncSnpIds = {};
-    
+
     totAncSnps = ancSnps->GetNumAncestrySnps();
+
     numSamples = 0;
     totVcfSnps = 0;
     putativeAncSnps = 0;
@@ -61,10 +62,35 @@ void VcfGrafAncSnpGeno::DeleteAncSnpGtValues()
     vcfAncSnpGtVals.clear();
 }
 
+bool VcfGrafAncSnpGeno::ReadHeaderFromFile()
+{
+    htsFile *fp = hts_open(vcfFile.c_str(), "r");
+    if (!fp) {
+        std::cerr << "Error opening VCF file " << vcfFile << std::endl;
+        return false;
+    }
+
+    bcf_hdr_t *header = bcf_hdr_read(fp);
+    if (!header) {
+        std::cerr << "Error reading VCF header from file " << vcfFile << std::endl;
+        return false;
+    }
+
+    numVcfSamples = bcf_hdr_nsamples(header);
+
+    bcf_hdr_destroy(header);
+    hts_close(fp);
+    
+    return true;
+}
+
 bool VcfGrafAncSnpGeno::ReadDataFromFile()
 {
-    cout << "Reading data from file " << vcfFile << "\n";
+    return ReadDataFromFile(-1, 0, true);
+}
 
+bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verbose)
+{
     unsigned int charBaseInts[4] = {64, 16, 4, 1};
     
     htsFile *fp = hts_open(vcfFile.c_str(), "r");
@@ -79,14 +105,23 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile()
         return false;
     }
 
-    cout << "header n1 = " << header->n[0] << " n2 = " << header->n[1] << " n3 = " << header->n[2] << std::endl;
+    int totVcfSamples = bcf_hdr_nsamples(header);
+
+    if (stSbjNo >= 0 || numReadSbjs < totVcfSamples) {
+        assert(stSbjNo % 4 == 0);
+        if (stSbjNo + numReadSbjs > totVcfSamples) numReadSbjs = totVcfSamples - stSbjNo;
+        
+        numSamples = numReadSbjs;
+        for (int i = 0; i < numSamples; i++) vcfSamples.push_back(header->samples[i+stSbjNo]);
+    }
+    else {
+        numSamples = totVcfSamples;
+        for (int i = 0; i < numSamples; i++) vcfSamples.push_back(header->samples[i]);
+    }
     
-    numSamples = bcf_hdr_nsamples(header);
-    
-    for (int i = 0; i < numSamples; i++) vcfSamples.push_back(header->samples[i]);
     numGenoChars = (numSamples - 1) / 4 + 1; // Save 4 genotypes to one char
-    cout << "\tVcf file has " << numSamples << " samples\n";
-    
+    cout << "\tVcf file has " << totVcfSamples << " samples. " << numSamples << " samples were read to memory\n";
+
     bcf1_t *record = bcf_init();
 
     int ngt_arr = 0;
@@ -118,14 +153,14 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile()
         int gb38SnpId = ancSnps->FindSnpIdGivenChrPos(chr, pos, 38, gRef, gAlt);
 
         // Testing
-        if (snpNo < 5) {        
+        if (snpNo < 0) {        
             cout << "chr " << chr << " pos " << pos << " rs " << rsNum << " ref " << gRef << " alt " << gAlt << " GT: " << ngt;
             cout << " rsSnpId " << rsSnpId << " 37Id " << gb37SnpId << " 38Id " << gb38SnpId;
         }
         
-        if (ngt == numSamples * 2) {
+        if (ngt == totVcfSamples * 2) {
             // Testing
-            if (snpNo < 5) {        
+            if (snpNo < 0) {        
                 for (int i = 0; i < 20; i++) {
                     int g1 = bcf_gt_allele(gt[i*2]);
                     int g2 = bcf_gt_allele(gt[i*2+1]);
@@ -153,7 +188,9 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile()
 
                     for (int charGenoNo = 0; charGenoNo < 4; charGenoNo++) {
                         int smpNo = charNo * 4 + charGenoNo;
-                        if (smpNo < numSamples) {
+                        if (stSbjNo >= 0) smpNo += stSbjNo;
+                        
+                        if (smpNo < totVcfSamples) {
                             int refGeno = bcf_gt_allele(gt[smpNo*2]);
                             int altGeno = bcf_gt_allele(gt[smpNo*2+1]);
                             unsigned char numAlts = 3;
@@ -193,13 +230,14 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile()
         
         snpNo++;
         
-        if (snpNo % 50000 == 0) {
-            cout << "\tChecked " << snpNo << " SNPs. Found " << putativeAncSnps << " SNPs with ancestry SNPs\n";
+        if (verbose && snpNo % 100000 == 0) {
+            cout << "\tChecked " << snpNo << " SNPs. Found " << putativeAncSnps << " SNPs with ancestry SNPs.\n";
         }
     }
 
     cout << "Done. Checked " << snpNo << " SNPs. Found " << putativeAncSnps << " SNPs with ancestry SNPs\n";
-
+    totVcfSnps = snpNo;
+    
     bcf_destroy(record);
     bcf_hdr_destroy(header);
     hts_close(fp);
@@ -254,11 +292,10 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
 
             if (expRefIdx > -1 && expAltIdx > -1) {
                 unsigned char* smpGenos = new unsigned char[numGenoChars];
-                vector<unsigned char> gtVal = vcfAncSnpGtVals[saveSnpNo];
-                
+
                 for (int charNo = 0; charNo < numGenoChars; charNo++) {
-                    int charGtVal = int(gtVal[charNo]);
-                    int charGeno = 0;
+                    int charGtVal = int(vcfAncSnpGtVals[saveSnpNo][charNo]);
+                    unsigned char charGeno = 0;
 
                     for (int cGenoNo = 0; cGenoNo < 4; cGenoNo++) {
                         int smpNo = charNo * 4 + cGenoNo;
@@ -266,7 +303,7 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
                             int numVcfAlts = charGtVal / charBaseInts[cGenoNo];
                             charGtVal -= numVcfAlts * charBaseInts[cGenoNo];
                             
-                            char geno = 3;                            
+                            unsigned char geno = 3;                            
                             
                             if (expAltIdx == 1) {
                                 geno = numVcfAlts; 
@@ -287,13 +324,14 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
                 
                 vcfAncSnpIds.push_back(ancSnpId);
                 vcfAncSnpCodedGenos.push_back(smpGenos);
+                vcfAncSnpGtVals[saveSnpNo].clear();
+                
                 ancSnpNo++;
             }
         }
     }
     
     DeleteAncSnpGtValues();
-    cout << "Checked " << putativeAncSnps << " putative SNPs. Recoded " << ancSnpNo << " SNPs\n";
 }
 
 void VcfGrafAncSnpGeno::ShowSummary()

@@ -97,7 +97,7 @@ void SampleGenoAncestry::SetSnpGenoData(vector<int> *snpIds, vector<unsigned cha
     numAncSnps = ancSnpIds->size();
 }
 
-int SampleGenoAncestry::SaveAncestryResults(string outFile)
+int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
 {
     int numSaveSmps = 0;
     for (int i = 0; i < numSamples; i++) {
@@ -113,48 +113,53 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
     string vtxTitle = "Positions (x, y, z coordinates) of the three vertices";
     vtxExpGd0->ShowPositions(vtxTitle);
 
-    FILE *ifp = fopen(outFile.c_str(), "w");
+    FILE *ifp = NULL;
+    if (isAppend) ifp = fopen(outFile.c_str(), "a");
+    else          ifp = fopen(outFile.c_str(), "w");
+    
     if(ifp) {
         char line[256];
-        fprintf(ifp, "# Positions of the three vertices\n");
-        fprintf(ifp, "#\n");
-
-        fprintf(ifp, "#          x       y      z\n");
-
-        sprintf(line, "# F: \t%5.4f  %5.4f %5.4f", vtxExpGd0->fPt.x, vtxExpGd0->fPt.y, vtxExpGd0->fPt.z);
-        fprintf(ifp, "%s\n", line);
-
-        sprintf(line, "# A: \t%5.4f  %5.4f %5.4f", vtxExpGd0->aPt.x, vtxExpGd0->aPt.y, vtxExpGd0->aPt.z);
-        fprintf(ifp, "%s\n", line);
-
-        sprintf(line, "# E: \t%5.4f  %5.4f %5.4f", vtxExpGd0->ePt.x, vtxExpGd0->ePt.y, vtxExpGd0->ePt.z);
-        fprintf(ifp, "%s\n", line);
-        fprintf(ifp, "#\n");
-
-        fprintf(ifp, "#\n");
-        fprintf(ifp, "# Subcontinental population raw score ranges\n");
-        fprintf(ifp, "#\n");
-        
-        char spHeader[256] = "# Score";
-        char rangeStr[256]  = "# Range";
-        sprintf(spHeader, "# Score");
-        sprintf(rangeStr, "# Range");
-        
-        for (int i = 0; i < numSubPopScores; i++) {
-            sprintf(spHeader, "%s\t%5s", spHeader, popScoreNames[i].c_str());
-            sprintf(rangeStr, "%s\t%6.5f", rangeStr, subPopGd0P2[i]-subPopGd0P1[i]);
+        if (!isAppend) {
+            fprintf(ifp, "# Positions of the three vertices\n");
+            fprintf(ifp, "#\n");
+    
+            fprintf(ifp, "#          x       y      z\n");
+    
+            sprintf(line, "# F: \t%5.4f  %5.4f %5.4f", vtxExpGd0->fPt.x, vtxExpGd0->fPt.y, vtxExpGd0->fPt.z);
+            fprintf(ifp, "%s\n", line);
+    
+            sprintf(line, "# A: \t%5.4f  %5.4f %5.4f", vtxExpGd0->aPt.x, vtxExpGd0->aPt.y, vtxExpGd0->aPt.z);
+            fprintf(ifp, "%s\n", line);
+    
+            sprintf(line, "# E: \t%5.4f  %5.4f %5.4f", vtxExpGd0->ePt.x, vtxExpGd0->ePt.y, vtxExpGd0->ePt.z);
+            fprintf(ifp, "%s\n", line);
+            fprintf(ifp, "#\n");
+    
+            fprintf(ifp, "#\n");
+            fprintf(ifp, "# Subcontinental population raw score ranges\n");
+            fprintf(ifp, "#\n");
+            
+            char spHeader[256] = "# Score";
+            char rangeStr[256]  = "# Range";
+            sprintf(spHeader, "# Score");
+            sprintf(rangeStr, "# Range");
+            
+            for (int i = 0; i < numSubPopScores; i++) {
+                sprintf(spHeader, "%s\t%5s", spHeader, popScoreNames[i].c_str());
+                sprintf(rangeStr, "%s\t%6.5f", rangeStr, subPopGd0P2[i]-subPopGd0P1[i]);
+            }
+    
+            fprintf(ifp, "%s\n", spHeader);
+            fprintf(ifp, "%s\n", rangeStr);
+            fprintf(ifp, "#\n");
+            
+            sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
+            for (int i = 0; i < numSubPopScores; i++) {
+                sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
+            }
+            sprintf(line, "%s\tE(\%)\tF(\%)\tA(\%)", line);
+            fprintf(ifp, "%s\n", line);
         }
-
-        fprintf(ifp, "%s\n", spHeader);
-        fprintf(ifp, "%s\n", rangeStr);
-        fprintf(ifp, "#\n");
-        
-        sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
-        for (int i = 0; i < numSubPopScores; i++) {
-            sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
-        }
-        sprintf(line, "%s\tE(\%)\tF(\%)\tA(\%)", line);
-        fprintf(ifp, "%s\n", line);
 
         for (int i = 0; i < numSamples; i++) {
             GenoSample smp = samples[i];
@@ -175,8 +180,9 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile)
     }
 
     fclose(ifp);
-    cout << "Saved population results of " << numSaveSmps << " samples to " << outFile << ".\n";
-
+    if (isAppend) cout << "Added population results of " << numSaveSmps << " samples to " << outFile << ".\n";
+    else          cout << "Saved population results of " << numSaveSmps << " samples to " << outFile << ".\n";
+        
     
     return numSaveSmps;
 }

@@ -17,6 +17,9 @@ using namespace std;
 #include "htslib/hts.h"
 #include "htslib/vcf.h"
 
+#include "sys/types.h"
+#include "sys/sysinfo.h"
+
 #if defined(__sun)
 #define PROC_SELF_EXE "/proc/self/path/a.out"
 #else
@@ -25,5 +28,8 @@ using namespace std;
 
 string GetExecutablePath(void);
 string FindFile(string);
+
+int GetAvailableMemoryInMb();
+int GetAllocatableMemoryInMb();
 
 #endif

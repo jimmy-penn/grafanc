@@ -25,7 +25,8 @@ private:
     vector<int> vcfGb38AncSnpIds;   // Ancestry SNP ID derived using Build 38 chr + pos
   
     int totAncSnps;
-    int numSamples;
+    int numVcfSamples; // All samples included in the vcf file
+    int numSamples;    // Samples to be analyzed
     int numGenoChars;
   
     int totVcfSnps;
@@ -53,8 +54,11 @@ public:
     
     int GetNumVcfSnps() { return totVcfSnps; };
     int GetNumSamples() { return numSamples; };
+    int GetTotalVcfSamples() { return numVcfSamples; };
     int GetNumVcfAncestrySnps() { return numVcfAncSnps; };
+    bool ReadHeaderFromFile();
     bool ReadDataFromFile();
+    bool ReadDataFromFile(int, int, bool=true);
     void RecodeSnpGenotypes();
     
     void ShowSummary();

@@ -66,109 +66,215 @@ int main(int argc, char* argv[])
 
     int numThreads = thread::hardware_concurrency();
     numThreads--;
-
+    
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
-
     smpGenoAnc->CalculateSubPopGd0Values();
-
+    
+    //// Get number of samples from PLINK fam file or vcf file
+    string bedFile = "";
+    string bimFile = "";
+    string famFile = "";
+    
+    FamFileSamples *famSmps = NULL;
+    BedFileSnpGeno *bedGeno = NULL;
+    BimFileAncestrySnps *bimSnps = NULL;
+    
+    int numDsSamples = 0;
+    string fileTypeStr = "";
+    
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
-         VcfGrafAncSnpGeno *vcfGeno = new VcfGrafAncSnpGeno(genoDs, ancSnps);
-        bool dataRead = vcfGeno->ReadDataFromFile();
-        if (!dataRead) {
-            cout << "\nFailed to read genotype data from " << genoDs << "\n\n";
-            return 0;
-        }
-        vcfGeno->ShowSummary();
-        vcfGeno->RecodeSnpGenotypes();
-
-        int numAncSnps = vcfGeno->vcfAncSnpIds.size();
-        int numVcfSmps = vcfGeno->GetNumSamples();
-
-        if (smpGenoAnc->HasEnoughAncestrySnps(numAncSnps)) {
-            smpGenoAnc->SetGenoSamples(vcfGeno->vcfSamples);
-            smpGenoAnc->SetSnpGenoData(&vcfGeno->vcfAncSnpIds, &vcfGeno->vcfAncSnpCodedGenos);
-        }
-        else {
-            cout << "\nWARNING: Ancestry inference not done due to lack of genotyped ancestry SNPs "
-             << "(at least " << minAncSnps << " ancestry SNPs are needed).\n\n";
-            return 0;
-        }
+        VcfGrafAncSnpGeno* vcfHead = new VcfGrafAncSnpGeno(genoDs, ancSnps);
+        bool headRead = vcfHead->ReadHeaderFromFile();
+        numDsSamples = vcfHead->GetTotalVcfSamples();
+        fileTypeStr = "VCF";
+        
+        delete vcfHead;
     }
     else if (fileType == GenoDatasetType::IS_PLINK) {
-        string bedFile = fileBase + ".bed";
-        string bimFile = fileBase + ".bim";
-        string famFile = fileBase + ".fam";
-
+        bedFile = fileBase + ".bed";
+        bimFile = fileBase + ".bim";
+        famFile = fileBase + ".fam";
+      
         if ( !FileExists(bedFile.c_str()) ||
              !FileExists(bimFile.c_str()) ||
              !FileExists(famFile.c_str())    ) {
-            if (!FileExists(bedFile.c_str())) cout << "\nERROR: didn't find " << bedFile << "\n";
-            if (!FileExists(bimFile.c_str())) cout << "\nERROR: didn't find " << bimFile << "\n";
-            if (!FileExists(famFile.c_str())) cout << "\nERROR: didn't find " << famFile << "\n";
-            cout << "\n";
-            return 0;
+             if (!FileExists(bedFile.c_str())) cout << "\nERROR: didn't find " << bedFile << "\n";
+             if (!FileExists(bimFile.c_str())) cout << "\nERROR: didn't find " << bimFile << "\n";
+             if (!FileExists(famFile.c_str())) cout << "\nERROR: didn't find " << famFile << "\n";
+             cout << "\n";
+             
+             return 0;
         }
-
-        FamFileSamples *famSmps = new FamFileSamples(famFile);
+        
+        famSmps = new FamFileSamples(famFile);
         famSmps->ShowSummary();
-
-        // smpGenoAnc->SetGenoSamples(famSmps->samples);
-        vector<FamSample> chkSmps;
-        int stSmpNo = 0;
-        int numChkSmps = famSmps->GetNumFamSamples();
         
-        for (int i = stSmpNo; i < stSmpNo+numChkSmps; i++) chkSmps.push_back(famSmps->samples[i]);
-        smpGenoAnc->SetGenoSamples(chkSmps);
+        numDsSamples = famSmps->GetNumFamSamples();
+        fileTypeStr = "PLINK";
+    }
+    
+    cout << "Number of samples in " << fileTypeStr << " dataset: " << numDsSamples << "\n";
+    if (fileTypeStr == "PLINK") cout << "File is PLINK\n";    
+
+    //// Check available memory
+    int availMem = GetAvailableMemoryInMb();
+    cout << "\nTotal " << availMem << " MiB memory available\n";
+
+    int totAllocMem = GetAllocatableMemoryInMb();
+    cout << totAllocMem << " MiB memory can be allocated\n";
+    
+    float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
+    
+    //// Determine how many rounds are needed for analyzing all samples
+    int memNeeded = int( (numDsSamples/1000) * (totAncSnps/1000) / genosPerByte );
+
+    int numSmpSegs = 1;
+    int smpSegSize = numDsSamples;
+
+    if (memNeeded > totAllocMem) {    
+        smpSegSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
+        smpSegSize = int(smpSegSize / 100.0) * 100; // Bump down to 100's
+        numSmpSegs = (numDsSamples-1) / smpSegSize + 1;
         
-        int numSmps = smpGenoAnc->GetNumSamples();
-
-        BimFileAncestrySnps *bimSnps = new BimFileAncestrySnps(totAncSnps);
-        bimSnps->ReadAncestrySnpsFromFile(bimFile, ancSnps);
-        
-        int numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
-
-        bimSnps->ShowSummary();
-
-        if (smpGenoAnc->HasEnoughAncestrySnps(numBimAncSnps)) {
-            BedFileSnpGeno *bedGeno = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
-            bedGeno->SelectFamSampleIds(stSmpNo, numChkSmps);
-          
-            bool hasErr = bedGeno->ReadGenotypesFromBedFile();
-            if (hasErr) return 0;
-            bedGeno->ShowSummary();
-            
-            smpGenoAnc->SetSnpGenoData(&bedGeno->ancSnpSnpIds, &bedGeno->ancSnpSmpGenos);
-        }
-        else {
-            cout << "Ancestry inference not done due to lack of genotyped ancestry SNPs.\n\n";
-            return 0;
-        }
+        cout << numSmpSegs << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpSegSize << " samples.\n";
     }
 
-    cout << "\nLaunching " << numThreads << " threads to calculate ancestry scores.\n";
-    smpGenoAnc->SetNumThreads(numThreads);
+    VcfGrafAncSnpGeno *vcfGeno = NULL;
+    
+    for (int round = 0; round < numSmpSegs; round++) {
+        if (numSmpSegs > 1) cout << "\nRound No. " << round+1 << "\n";
+      
+        struct timeval rt1, rtm, rt2;
+        gettimeofday(&rt1, NULL);
+        
+        bool hasVcfGeno = false;
+        bool hasBedGeno = false;
+        
+        if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
+            vcfGeno = new VcfGrafAncSnpGeno(genoDs, ancSnps);
+            hasVcfGeno = true; 
+    
+            bool verbose = round == 0 ? true : false;
+            bool dataRead = vcfGeno->ReadDataFromFile(round*smpSegSize, smpSegSize, verbose);
 
-    mutex iomutex;
-    vector<thread> threads(numThreads);
-
-    for (unsigned i = 0; i < numThreads; ++i) {
-        threads[i] = thread([&iomutex, i] {
-            {
-                lock_guard<mutex> iolock(iomutex);
+            if (!dataRead) {
+                cout << "\nFailed to read genotype data from " << genoDs << "\n\n";
+                return 0;
             }
+            vcfGeno->RecodeSnpGenotypes();
+            
+            int totVcfSnps = vcfGeno->GetNumVcfSnps();
+            int numAncSnps = vcfGeno->vcfAncSnpIds.size();
+            
+            int numVcfSmps = vcfGeno->GetTotalVcfSamples();
+            int numChkSmps = vcfGeno->GetNumSamples();
+            
+            if (round == 0) cout << "Total " << totVcfSnps << " SNPs in VCF file. " << numAncSnps << " SNPs are ancestry SNPs.\n"; 
+            if (round == 0) cout << "Total " << numVcfSmps << " samples in file.\n";
+            if (numSmpSegs > 1) cout << "\tGenotypes read for " << numChkSmps << " samples.\n";
 
-	        smpGenoAnc->SetAncestryPvalues(i);
-        });
+            if (smpGenoAnc->HasEnoughAncestrySnps(numAncSnps)) {
+                smpGenoAnc->SetGenoSamples(vcfGeno->vcfSamples);
+                smpGenoAnc->SetSnpGenoData(&vcfGeno->vcfAncSnpIds, &vcfGeno->vcfAncSnpCodedGenos);
+            }
+            else {
+                cout << "\nWARNING: Ancestry inference not done due to lack of genotyped ancestry SNPs "
+                 << "(at least " << minAncSnps << " ancestry SNPs are needed).\n\n";
+                return 0;
+            }
+        }
+        else if (fileType == GenoDatasetType::IS_PLINK) {
+            if ( !FileExists(bedFile.c_str()) ||
+                 !FileExists(bimFile.c_str()) ||
+                 !FileExists(famFile.c_str())    ) {
+                if (!FileExists(bedFile.c_str())) cout << "\nERROR: didn't find " << bedFile << "\n";
+                if (!FileExists(bimFile.c_str())) cout << "\nERROR: didn't find " << bimFile << "\n";
+                if (!FileExists(famFile.c_str())) cout << "\nERROR: didn't find " << famFile << "\n";
+                cout << "\n";
+                return 0;
+            }
+    
+            //smpGenoAnc->SetGenoSamples(famSmps->samples);
+        
+            vector<FamSample> chkSmps;
+            int stSmpNo = round * smpSegSize;
+            int numChkSmps = smpSegSize;
+    
+            for (int i = stSmpNo; i < stSmpNo+numChkSmps; i++) chkSmps.push_back(famSmps->samples[i]);
+            
+            smpGenoAnc->SetGenoSamples(chkSmps);
+            
+            int numSmps = smpGenoAnc->GetNumSamples();
+            
+            bimSnps = new BimFileAncestrySnps(totAncSnps);
+            bimSnps->ReadAncestrySnpsFromFile(bimFile, ancSnps);
+    
+            int numBimAncSnps = bimSnps->GetNumBimAncestrySnps();
+    
+            bimSnps->ShowSummary();
+            
+            if (smpGenoAnc->HasEnoughAncestrySnps(numBimAncSnps)) {
+                bedGeno = new BedFileSnpGeno(bedFile, ancSnps, bimSnps, famSmps);
+                hasBedGeno = true;
+    
+                //// Testing  
+                bedGeno->SelectFamSampleIds(stSmpNo, numChkSmps);
+                bool hasErr = bedGeno->ReadGenotypesFromBedFile();
+                
+                if (hasErr) return 0;
+                bedGeno->ShowSummary();
+                
+                smpGenoAnc->SetSnpGenoData(&bedGeno->ancSnpSnpIds, &bedGeno->ancSnpSmpGenos);
+            }
+            else {
+                cout << "Ancestry inference not done due to lack of genotyped ancestry SNPs.\n\n";
+                return 0;
+            }
+        }
+        
+        cout << "\tDone reading genotypes.\n";
+        gettimeofday(&rtm, NULL);
+        ShowTimeDiff(rt1, rtm);
+        
+        cout << "\nLaunching " << numThreads << " threads to calculate ancestry scores.\n";
+        smpGenoAnc->SetNumThreads(numThreads);
+    
+        mutex iomutex;
+        vector<thread> threads(numThreads);
+    
+        for (unsigned i = 0; i < numThreads; ++i) {
+            threads[i] = thread([&iomutex, i] {
+                {
+                    lock_guard<mutex> iolock(iomutex);
+                }
+    
+    	        smpGenoAnc->SetAncestryPvalues(i);
+            });
+        }
+    
+        for (auto& t : threads) {
+            t.join();
+        }
+    
+        //// Append results to the output file
+        bool isAppend = round == 0 ? false : true;
+        smpGenoAnc->SaveAncestryResults(outputFile, isAppend);
+    
+        if (hasVcfGeno) delete vcfGeno;
+        if (hasBedGeno) delete bedGeno;
+        
+        smpGenoAnc->ResetSamples();
+
+        cout << "\tResults saved to " << outputFile << "\n";
+        gettimeofday(&rt2, NULL);
+        ShowTimeDiff(rtm, rt2);
     }
-
-    for (auto& t : threads) {
-        t.join();
-    }
-
-    smpGenoAnc->SaveAncestryResults(outputFile);
-
-    gettimeofday(&t2, NULL);
     cout << "\n";
+    
+    delete famSmps;
+    delete bimSnps;
+    
+    gettimeofday(&t2, NULL);
     ShowTimeDiff(t1, t2);
 
     return 1;
@@ -210,3 +316,47 @@ string FindFile(string filename)
 
     return "";
 }
+
+int GetAvailableMemoryInMb()
+{
+    struct sysinfo memInfo;
+    
+    sysinfo (&memInfo);
+    long long totVirtMem = memInfo.totalram;
+    totVirtMem += memInfo.totalswap;
+    totVirtMem *= memInfo.mem_unit;
+    
+    int totPhysMem = memInfo.totalram / 1000000;
+    totPhysMem *= memInfo.mem_unit;
+    
+    return totPhysMem;
+}
+
+int GetAllocatableMemoryInMb()
+{
+    int mbSize = 1000000; 
+    size_t blockSize = mbSize * 100;
+    size_t totalAllocated = blockSize * 1000;
+    
+    int iter = 0;
+    bool done = false;
+    
+    while (!done) {
+        try {
+            char* ptr = new char[totalAllocated];
+            delete[] ptr;
+            done = true;
+        } 
+        catch (std::bad_alloc& ba) {
+            totalAllocated -= blockSize;
+        }
+        
+        iter++;
+        if (iter > 2000) done = true;
+    }
+  
+    int mbAllocated = totalAllocated / mbSize;  
+    
+    return mbAllocated;
+}
+

@@ -43,8 +43,8 @@ bool BedFileSnpGeno::SelectFamSampleIds(int stSmpNo, int numSmps)
 {
     assert(stSmpNo % 4 == 0); // Read 4 sample genos each time and save them to one byte
     assert(stSmpNo >= 0);
-    assert(stSmpNo + numSmps <= numFamSamples);
-    
+    if (stSmpNo + numSmps > numFamSamples) numSmps = numFamSamples - stSmpNo;
+
     startSmpNo = stSmpNo;
     numSamples = numSmps;
     

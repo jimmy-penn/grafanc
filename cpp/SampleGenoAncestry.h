@@ -85,7 +85,7 @@ public:
 
     void SetGenoSamples(const vector<string>&);
     void SetGenoSamples(const vector<FamSample>&);
-    int SaveAncestryResults(string);
+    int SaveAncestryResults(string, bool=false);
     void SetAncestryPvalues(int);
     void SetSnpGenoData(vector<int>*, vector<unsigned char*>*);
     void SetNumThreads(int);
@@ -95,7 +95,8 @@ public:
     int GetNumSamples() { return numSamples; };
     int GetNumAncSamples() { return numAncSmps; };
     bool HasEnoughAncestrySnps(int numSnps) { return numSnps >= minAncSnps; }
-
+    void ResetSamples() { samples.clear(); }
+    
     void ShowSummary();
 };
 
