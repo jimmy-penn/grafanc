@@ -9,6 +9,9 @@ GenoSample::GenoSample(string smp)
     mother = "";
     sex = 0;
 
+    numHetSnps = 0;
+    hetRate = -1;
+
     numAncSnps = 0;
     ancIsSet = false;
 }
@@ -118,7 +121,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     else          ifp = fopen(outFile.c_str(), "w");
     
     if(ifp) {
-        char line[256];
+        char line[512];
         if (!isAppend) {
             fprintf(ifp, "# Positions of the three vertices\n");
             fprintf(ifp, "#\n");
@@ -153,11 +156,11 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             fprintf(ifp, "%s\n", rangeStr);
             fprintf(ifp, "#\n");
             
-            sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
+            sprintf(line, "%s\t%s\t%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs", "#HeteroSNPs", "HeteroRate");
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
             }
-            sprintf(line, "%s\tE(\%)\tF(\%)\tA(\%)", line);
+            sprintf(line, "%s\tPe\tPf\tPa", line);
             fprintf(ifp, "%s\n", line);
         }
 
@@ -165,12 +168,13 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             GenoSample smp = samples[i];
             if (!smp.ancIsSet) continue;
 
-            sprintf(line, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
+            sprintf(line, "%s\t%6d\t%6d\t%5.4f", smp.name.c_str(), smp.numAncSnps, smp.numHetSnps, smp.hetRate);
             sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
             }
             sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f", line, smp.ePct, smp.fPct, smp.aPct);
+
             fprintf(ifp, "%s\n", line);
         }
     }
@@ -302,8 +306,11 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
         int chrGenoIdx = smpNo % 4;
 
         int bit1Pos = chrGenoIdx * 2;
-        int bit2Pos = bit1Pos + 1;;
-
+        int bit2Pos = bit1Pos + 1;
+        
+        // Count heterozygous genotypes for each sample
+        int hetSnps = 0;
+        
         for (ancSnpNo = 0; ancSnpNo < numAncSnps; ancSnpNo++) {
             unsigned char* chrGenos = (*ancSnpCodedGenos)[ancSnpNo];
             unsigned char chrGeno = chrGenos[genoChrNo];
@@ -382,7 +389,8 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
                         smpGdScoreSnpNum[sId]++;
                     }                      
                 }
-                
+
+                if (geno == 1) hetSnps++;
                 numGenoSnps++;
             }
         }
@@ -444,6 +452,9 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
 
         samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, ePct, fPct, aPct, hasAncGeno);
         samples[smpNo].SetSubPopGdScores(smpGdScore);
+
+        samples[smpNo].numHetSnps = hetSnps;
+        samples[smpNo].hetRate = numGenoSnps > 0 ? hetSnps * 1.0 / numGenoSnps : -1;
         
         smpCnt++;
         if (thNo == 0 && smpCnt % 100 == 0)

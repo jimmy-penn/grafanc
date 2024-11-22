@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
     smpGenoAnc->CalculateSubPopGd0Values();
-    
+
     //// Get number of samples from PLINK fam file or vcf file
     string bedFile = "";
     string bimFile = "";
@@ -192,16 +192,6 @@ int main(int argc, char* argv[])
             }
         }
         else if (fileType == GenoDatasetType::IS_PLINK) {
-            if ( !FileExists(bedFile.c_str()) ||
-                 !FileExists(bimFile.c_str()) ||
-                 !FileExists(famFile.c_str())    ) {
-                if (!FileExists(bedFile.c_str())) cout << "\nERROR: didn't find " << bedFile << "\n";
-                if (!FileExists(bimFile.c_str())) cout << "\nERROR: didn't find " << bimFile << "\n";
-                if (!FileExists(famFile.c_str())) cout << "\nERROR: didn't find " << famFile << "\n";
-                cout << "\n";
-                return 0;
-            }
-    
             vector<FamSample> chkSmps;
             int stSmpNo = round * smpSegSize;
             int numChkSmps = smpSegSize;

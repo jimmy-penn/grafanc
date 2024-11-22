@@ -19,6 +19,8 @@ public:
 
     // Ancestry results calculated from genotypes
     int numAncSnps;
+    int numHetSnps;
+    float hetRate;
     bool ancIsSet;
     float gd1, gd2, gd3;
     float ePct, fPct, aPct;   // Ancestry (EUR, AFR, EAS) components of the sample
