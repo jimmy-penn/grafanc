@@ -23,12 +23,13 @@ public:
     float hetRate;
     bool ancIsSet;
     float gd1, gd2, gd3;
-    float ePct, fPct, aPct;   // Ancestry (EUR, AFR, EAS) components of the sample
+    float ePct, fPct, aPct;    // Ancestry (EUR, AFR, EAS) components of the sample
+    float rawPe, rawPf, rawPa; // Raw scores of above percentages
     float subPopScores[numSubPopScores];
 
 public:
     GenoSample(string);
-    void SetAncestryScores(int, float, float, float, float, float, float, bool);
+    void SetAncestryScores(int, float, float, float, float, float, float, float, float, float, bool);
     void SetSubPopGdScores(float*);
 };
 

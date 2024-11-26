@@ -16,7 +16,7 @@ GenoSample::GenoSample(string smp)
     ancIsSet = false;
 }
 
-void GenoSample::SetAncestryScores(int numSnps, float d1, float d2, float d3, float e, float f, float a, bool isAnc)
+void GenoSample::SetAncestryScores(int numSnps, float d1, float d2, float d3, float e, float f, float a, float rPe, float rPf, float rPa, bool isAnc)
 {
     numAncSnps = numSnps;
     ancIsSet = isAnc;
@@ -26,6 +26,9 @@ void GenoSample::SetAncestryScores(int numSnps, float d1, float d2, float d3, fl
     ePct = e;
     fPct = f;
     aPct = a;
+    rawPe = rPe;
+    rawPf = rPf;
+    rawPa = rPa;
 }
 
 void GenoSample::SetSubPopGdScores(float* scores)
@@ -160,7 +163,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
             }
-            sprintf(line, "%s\tPe\tPf\tPa", line);
+            sprintf(line, "%s\tPe\tPf\tPa\tRawPe\tRawPf\tRawPa", line);
             fprintf(ifp, "%s\n", line);
         }
 
@@ -173,7 +176,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
             }
-            sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f", line, smp.ePct, smp.fPct, smp.aPct);
+            sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f", line, smp.ePct, smp.fPct, smp.aPct, smp.rawPe, smp.rawPf, smp.rawPa);
 
             fprintf(ifp, "%s\n", line);
         }
@@ -411,6 +414,7 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
 
         float gd1 = 0, gd2 = 0, gd3 = 0;
         float ePct = 0, fPct = 0, aPct = 0;
+        float rPe = 0, rPf = 0, rPa = 0;    // Raw E, F, A percentages
         bool hasAncGeno = false;
 
         if (numGenoSnps >= minAncSnps) {
@@ -437,20 +441,23 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
             gd2 = smpGd->eWt * vtxExpGd0->ePt.y + smpGd->fWt * vtxExpGd0->fPt.y + smpGd->aWt * vtxExpGd0->aPt.y;
             gd3 = smpGd->sPt.z;
 
-            double ejWt = smpGd->eWt > 0 ? smpGd->eWt : 0;
-            double fjWt = smpGd->fWt > 0 ? smpGd->fWt : 0;
-            double ajWt = smpGd->aWt > 0 ? smpGd->aWt : 0;
-            double totWt = fjWt + ejWt + ajWt;
+            float ejWt = smpGd->eWt > 0 ? smpGd->eWt : 0;
+            float fjWt = smpGd->fWt > 0 ? smpGd->fWt : 0;
+            float ajWt = smpGd->aWt > 0 ? smpGd->aWt : 0;
+            float totWt = fjWt + ejWt + ajWt;
             ePct = ejWt * 100 / totWt;
             fPct = fjWt * 100 / totWt;
             aPct = ajWt * 100 / totWt;
+            rPe = smpGd->eWt * 100;
+            rPf = smpGd->fWt * 100;
+            rPa = smpGd->aWt * 100;
 
             hasAncGeno = true;
             numAncSmps++;
             delete smpGd;
         }
 
-        samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, ePct, fPct, aPct, hasAncGeno);
+        samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, ePct, fPct, aPct, rPe, rPf, rPa, hasAncGeno);
         samples[smpNo].SetSubPopGdScores(smpGdScore);
 
         samples[smpNo].numHetSnps = hetSnps;
