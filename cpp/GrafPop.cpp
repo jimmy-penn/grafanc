@@ -19,15 +19,19 @@ int main(int argc, char* argv[])
         cout << usage << "\n";
         exit(0);
     }
-
+    
     struct timeval t1, t2;
     gettimeofday(&t1, NULL);
 
     string genoDs, outputFile;
     genoDs = argv[1];
     outputFile = argv[2];
-
+    
+    parameters params = GetParameters(argc, argv);
+    
     string fileBase = "";
+    cout << "Checking file " << genoDs << "\n";
+    
     GenoDatasetType fileType = CheckGenoDataFile(genoDs, &fileBase);
 
     if (fileType == GenoDatasetType::NOT_EXISTS) {
@@ -52,9 +56,6 @@ int main(int argc, char* argv[])
     string refSubPopFile = ancSnpFile;
     string nomSubPopFile = "";
     
-    if (argc > 3) refSubPopFile = argv[3];      
-    if (argc > 4) nomSubPopFile = argv[4];      
-        
     AncestrySnps *ancSnps = new AncestrySnps();
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
 
@@ -65,7 +66,7 @@ int main(int argc, char* argv[])
     int minAncSnps = 100;
 
     int numThreads = thread::hardware_concurrency();
-    numThreads--;
+    if (params.numThreads && params.numThreads < numThreads) numThreads = params.numThreads;
     
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
     smpGenoAnc->CalculateSubPopGd0Values();
@@ -126,31 +127,39 @@ int main(int argc, char* argv[])
 
     //// Check available memory
     int availMem = GetAvailableMemoryInMb();
-    cout << "\nTotal " << availMem << " MiB memory available\n";
-
+    
+    int maxMem = 8000;
+    if (params.maxMemMb) maxMem = params.maxMemMb;
+    
     int totAllocMem = GetAllocatableMemoryInMb();
-    cout << totAllocMem << " MiB memory can be allocated\n";
+    cout << "Available memory: " << totAllocMem << " MiB\n";
+    if (totAllocMem > maxMem) {
+        cout << "Maximum "  << maxMem << " MiB will be used.\n";
+        totAllocMem = maxMem;
+    }
     
     float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
 
     //// Determine how many rounds are needed for analyzing all samples
     int memNeeded = int( (numDsSamples/1000) * (totAncSnps/1000) / genosPerByte );
 
-    int numSmpSegs = 1;
-    int smpSegSize = numDsSamples;
+    int numSmpBlocks = 1;
+    int smpBlockSize = numDsSamples;
 
+    cout << "Need memory: " << memNeeded << " MiB\n";
     if (memNeeded > totAllocMem) {    
-        smpSegSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
-        smpSegSize = int(smpSegSize / 100.0) * 100; // Bump down to 100's
-        numSmpSegs = (numDsSamples-1) / smpSegSize + 1;
+        smpBlockSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
+        smpBlockSize = int(smpBlockSize / 100.0) * 100; // Bump down to 100's
+        if (params.blockSize && params.blockSize < smpBlockSize) smpBlockSize = params.blockSize;
+        numSmpBlocks = (numDsSamples-1) / smpBlockSize + 1;
         
-        cout << numSmpSegs << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpSegSize << " samples.\n";
+        cout << numSmpBlocks << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpBlockSize << " samples.\n";
     }
 
     VcfGrafAncSnpGeno *vcfGeno = NULL;
     
-    for (int round = 0; round < numSmpSegs; round++) {
-        if (numSmpSegs > 1) cout << "\nRound No. " << round+1 << "\n";
+    for (int round = 0; round < numSmpBlocks; round++) {
+        if (numSmpBlocks > 1) cout << "\nRound No. " << round+1 << "\n";
       
         struct timeval rt1, rtm, rt2;
         gettimeofday(&rt1, NULL);
@@ -163,7 +172,7 @@ int main(int argc, char* argv[])
             hasVcfGeno = true; 
     
             bool verbose = round == 0 ? true : false;
-            bool dataRead = vcfGeno->ReadDataFromFile(round*smpSegSize, smpSegSize, verbose);
+            bool dataRead = vcfGeno->ReadDataFromFile(round*smpBlockSize, smpBlockSize, verbose);
 
             if (!dataRead) {
                 cout << "\nFailed to read genotype data from " << genoDs << "\n\n";
@@ -179,7 +188,7 @@ int main(int argc, char* argv[])
             
             if (round == 0) cout << "Total " << totVcfSnps << " SNPs in VCF file. " << numAncSnps << " SNPs are ancestry SNPs.\n"; 
             if (round == 0) cout << "Total " << numVcfSmps << " samples in file.\n";
-            if (numSmpSegs > 1) cout << "\tGenotypes read for " << numChkSmps << " samples.\n";
+            if (numSmpBlocks > 1) cout << "\tGenotypes read for " << numChkSmps << " samples.\n";
 
             if (smpGenoAnc->HasEnoughAncestrySnps(numAncSnps)) {
                 smpGenoAnc->SetGenoSamples(vcfGeno->vcfSamples);
@@ -193,8 +202,8 @@ int main(int argc, char* argv[])
         }
         else if (fileType == GenoDatasetType::IS_PLINK) {
             vector<FamSample> chkSmps;
-            int stSmpNo = round * smpSegSize;
-            int numChkSmps = smpSegSize;
+            int stSmpNo = round * smpBlockSize;
+            int numChkSmps = smpBlockSize;
             if (stSmpNo + numChkSmps > numDsSamples) numChkSmps = numDsSamples - stSmpNo;
     
             for (int i = stSmpNo; i < stSmpNo+numChkSmps; i++) chkSmps.push_back(famSmps->samples[i]);
@@ -225,7 +234,7 @@ int main(int argc, char* argv[])
         gettimeofday(&rtm, NULL);
         ShowTimeDiff(rt1, rtm);
         
-        cout << "\nLaunching " << numThreads << " threads to calculate ancestry scores.\n";
+        cout << "Launching " << numThreads << " threads to calculate ancestry scores.\n";
         smpGenoAnc->SetNumThreads(numThreads);
     
         mutex iomutex;
@@ -237,7 +246,7 @@ int main(int argc, char* argv[])
                     lock_guard<mutex> iolock(iomutex);
                 }
     
-    	        smpGenoAnc->SetAncestryPvalues(i);
+      	        smpGenoAnc->SetAncestryPvalues(i);
             });
         }
     
@@ -348,4 +357,47 @@ int GetAllocatableMemoryInMb()
     
     return mbAllocated;
 }
+
+parameters GetParameters(int argc, char** argv)
+{
+    parameters param = {0, 0, 0};
+
+    int optRes;
+    int optIdx;
+
+    static struct option options[] =
+        {
+            {"maxmem",   required_argument, 0, 0},
+            {"block",    required_argument, 0, 0},
+            {"threads",  required_argument, 0, 0},
+            {0, 0, 0, 0}
+        }; 
+    
+    
+    while ((optRes = getopt_long(argc, argv, "", options, &optIdx)) != -1)
+    {
+        switch (optRes)
+        {
+            // 0 means long option.
+            case 0:
+            {
+                if (optarg) {
+                    int argVal = atoi(optarg);
+                    if (strcmp(options[optIdx].name, "maxmem") == 0)  param.maxMemMb   = argVal;
+                    if (strcmp(options[optIdx].name, "block") == 0)   param.blockSize  = argVal;
+                    if (strcmp(options[optIdx].name, "threads") == 0) param.numThreads = argVal;
+                }    
+                break;
+            }
+        }
+    }
+    
+    // Set minimum requied memory and block size
+    if (param.maxMemMb > 0 && param.maxMemMb < 100) param.maxMemMb = 100;
+    if (param.blockSize > 0 && param.blockSize < 100) param.blockSize = 100;
+    param.blockSize = int(param.blockSize / 100.0) * 100; // Bump down to 100's
+    
+    return param;
+}
+
 

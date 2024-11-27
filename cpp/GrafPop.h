@@ -3,6 +3,7 @@ using namespace std;
 #ifndef GRAFPOP_H
 #define GRAFPOP_H
 
+#include <getopt.h>
 #include "Util.h"
 #include "AncestrySnps.h"
 #include "VcfGrafAncSnpGeno.h"
@@ -31,5 +32,13 @@ string FindFile(string);
 
 int GetAvailableMemoryInMb();
 int GetAllocatableMemoryInMb();
+
+typedef struct parameters {
+    int blockSize;     // Number of samples analyzed in each round 
+    int numThreads;    // Maximum threads to use
+    int maxMemMb;      // Maximum memory to use
+} parameters;
+
+parameters GetParameters(int, char**);
 
 #endif
