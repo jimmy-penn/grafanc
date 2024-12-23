@@ -65,7 +65,9 @@ int main(int argc, char* argv[])
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
 
-    int numThreads = thread::hardware_concurrency();
+    int numThreads = 4; // Default to maximum 4 threads
+    int numCpus = thread::hardware_concurrency();
+    if (numThreads > numCpus) numThreads = numCpus;
     if (params.numThreads && params.numThreads < numThreads) numThreads = params.numThreads;
     
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
@@ -129,7 +131,7 @@ int main(int argc, char* argv[])
     int availMem = GetAvailableMemoryInMb();
     
     int maxMem = 8000;
-    if (params.maxMemMb) maxMem = params.maxMemMb;
+    if (params.maxMemoryInMb) maxMem = params.maxMemoryInMb;
     
     int totAllocMem = GetAllocatableMemoryInMb();
     cout << "Available memory: " << totAllocMem << " MiB\n";
@@ -141,8 +143,9 @@ int main(int argc, char* argv[])
     float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
 
     //// Determine how many rounds are needed for analyzing all samples
-    int memNeeded = int( (numDsSamples/1000) * (totAncSnps/1000) / genosPerByte );
-
+    int memNeeded = int( (numDsSamples/1000 + 1) * (totAncSnps/1000) / genosPerByte );
+    memNeeded = (memNeeded+99) / 100 * 100; // Bump up to 100's
+    
     int numSmpBlocks = 1;
     int smpBlockSize = numDsSamples;
 
@@ -150,7 +153,7 @@ int main(int argc, char* argv[])
     if (memNeeded > totAllocMem) {    
         smpBlockSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
         smpBlockSize = int(smpBlockSize / 100.0) * 100; // Bump down to 100's
-        if (params.blockSize && params.blockSize < smpBlockSize) smpBlockSize = params.blockSize;
+        if (params.numSmpsPerBlock && params.numSmpsPerBlock < smpBlockSize) smpBlockSize = params.numSmpsPerBlock;
         numSmpBlocks = (numDsSamples-1) / smpBlockSize + 1;
         
         cout << numSmpBlocks << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpBlockSize << " samples.\n";
@@ -368,7 +371,7 @@ parameters GetParameters(int argc, char** argv)
     static struct option options[] =
         {
             {"maxmem",   required_argument, 0, 0},
-            {"block",    required_argument, 0, 0},
+            {"samples",  required_argument, 0, 0},
             {"threads",  required_argument, 0, 0},
             {0, 0, 0, 0}
         }; 
@@ -383,8 +386,8 @@ parameters GetParameters(int argc, char** argv)
             {
                 if (optarg) {
                     int argVal = atoi(optarg);
-                    if (strcmp(options[optIdx].name, "maxmem") == 0)  param.maxMemMb   = argVal;
-                    if (strcmp(options[optIdx].name, "block") == 0)   param.blockSize  = argVal;
+                    if (strcmp(options[optIdx].name, "maxmem") == 0)  param.maxMemoryInMb = argVal;
+                    if (strcmp(options[optIdx].name, "samples") == 0) param.numSmpsPerBlock  = argVal;
                     if (strcmp(options[optIdx].name, "threads") == 0) param.numThreads = argVal;
                 }    
                 break;
@@ -393,9 +396,9 @@ parameters GetParameters(int argc, char** argv)
     }
     
     // Set minimum requied memory and block size
-    if (param.maxMemMb > 0 && param.maxMemMb < 100) param.maxMemMb = 100;
-    if (param.blockSize > 0 && param.blockSize < 100) param.blockSize = 100;
-    param.blockSize = int(param.blockSize / 100.0) * 100; // Bump down to 100's
+    if (param.maxMemoryInMb > 0 && param.maxMemoryInMb < 100) param.maxMemoryInMb = 100;
+    if (param.numSmpsPerBlock > 0 && param.numSmpsPerBlock < 100) param.numSmpsPerBlock = 100;
+    param.numSmpsPerBlock = int(param.numSmpsPerBlock / 100.0) * 100; // Bump down to 100's
     
     return param;
 }

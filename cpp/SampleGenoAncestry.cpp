@@ -126,44 +126,13 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     if(ifp) {
         char line[512];
         if (!isAppend) {
-            fprintf(ifp, "# Positions of the three vertices\n");
-            fprintf(ifp, "#\n");
-    
-            fprintf(ifp, "#          x       y      z\n");
-    
-            sprintf(line, "# F: \t%5.4f  %5.4f %5.4f", vtxExpGd0->fPt.x, vtxExpGd0->fPt.y, vtxExpGd0->fPt.z);
-            fprintf(ifp, "%s\n", line);
-    
-            sprintf(line, "# A: \t%5.4f  %5.4f %5.4f", vtxExpGd0->aPt.x, vtxExpGd0->aPt.y, vtxExpGd0->aPt.z);
-            fprintf(ifp, "%s\n", line);
-    
-            sprintf(line, "# E: \t%5.4f  %5.4f %5.4f", vtxExpGd0->ePt.x, vtxExpGd0->ePt.y, vtxExpGd0->ePt.z);
-            fprintf(ifp, "%s\n", line);
-            fprintf(ifp, "#\n");
-    
-            fprintf(ifp, "#\n");
-            fprintf(ifp, "# Subcontinental population raw score ranges\n");
-            fprintf(ifp, "#\n");
-            
-            char spHeader[256] = "# Score";
-            char rangeStr[256]  = "# Range";
-            sprintf(spHeader, "# Score");
-            sprintf(rangeStr, "# Range");
-            
-            for (int i = 0; i < numSubPopScores; i++) {
-                sprintf(spHeader, "%s\t%5s", spHeader, popScoreNames[i].c_str());
-                sprintf(rangeStr, "%s\t%6.5f", rangeStr, subPopGd0P2[i]-subPopGd0P1[i]);
-            }
-    
-            fprintf(ifp, "%s\n", spHeader);
-            fprintf(ifp, "%s\n", rangeStr);
-            fprintf(ifp, "#\n");
-            
             sprintf(line, "%s\t%s\t%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs", "#HeteroSNPs", "HeteroRate");
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
             }
             sprintf(line, "%s\tPe\tPf\tPa\tRawPe\tRawPf\tRawPa", line);
+            sprintf(line, "%s\tAncGroupID", line);
+
             fprintf(ifp, "%s\n", line);
         }
 
@@ -176,7 +145,8 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
             }
-            sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f", line, smp.ePct, smp.fPct, smp.aPct, smp.rawPe, smp.rawPf, smp.rawPa);
+            sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%d",
+                    line, smp.ePct, smp.fPct, smp.aPct, smp.rawPe, smp.rawPf, smp.rawPa, smp.ancGroupId);
 
             fprintf(ifp, "%s\n", line);
         }
@@ -459,7 +429,8 @@ void SampleGenoAncestry::SetAncestryPvalues(int thNo)
 
         samples[smpNo].SetAncestryScores(numGenoSnps, gd1, gd2, gd3, ePct, fPct, aPct, rPe, rPf, rPa, hasAncGeno);
         samples[smpNo].SetSubPopGdScores(smpGdScore);
-
+        samples[smpNo].SetGrafAncGroups();
+        
         samples[smpNo].numHetSnps = hetSnps;
         samples[smpNo].hetRate = numGenoSnps > 0 ? hetSnps * 1.0 / numGenoSnps : -1;
         
@@ -489,3 +460,202 @@ void SampleGenoAncestry::ShowSummary()
     }
 }
 
+void GenoSample::SetGrafAncGroups()
+{
+    float ea1 = subPopScores[0];
+    float ea2 = subPopScores[1];
+    // float ea3 = subPopScores[2];
+    float ea4 = subPopScores[3];
+    float af1 = subPopScores[4];
+    float af2 = subPopScores[5];
+    float af3 = subPopScores[6];
+    float eu1 = subPopScores[7];
+    float eu2 = subPopScores[8];
+    float eu3 = subPopScores[9];
+    float sa1 = subPopScores[10];
+    float sa2 = subPopScores[11];
+    float ic1 = subPopScores[12];
+    float ic2 = subPopScores[13];
+    float ic3 = subPopScores[14];
+    
+    int ancId = 0;
+    
+    if (aPct > 50 && fPct > 10 && ic1 > 0.4 && gd3 > 0.035) {
+        ancId = 700; // Oceania
+    }                
+    else if (ic1 > 0.5 && fPct < 15) {
+        // South Asia
+        
+        if (sa2 < -0.1) {
+            ancId = 402;  // Gujarati
+        }
+        else if (sa2 > 0.7) {
+            ancId = 403;  // Pakistan
+        }
+        else if (sa1 < -0.6) {
+            ancId = 404;  // Sri Lanka
+        }
+        else if (sa1 > 0.1) {
+            ancId = 405;  // Bangaladesh
+        }
+        else {
+            ancId = 401;  // India
+        }
+    }
+    else if (aPct > 15 && fPct > 15) {
+        ancId = 800;      // Multiple ancestry
+    }
+    else if (ic1 > -0.3 && aPct > 40) {
+        // East Asia
+        
+        if (ea2 > 1.4) {
+            ancId = 501; // Ryukyu
+        }
+        else if (ea2 > 0.4) {
+            ancId = 502; // Japan
+        }
+        else if (ea4 > -0.7 && ea4 < -0.2 && ea1 < -0.3) {
+            ancId = 504; // Includes Northern China Minorities
+        }
+        else if (ea2 > -0.3 && ea1 < -0.3) {
+            ancId = 503; // Korea
+        }
+        else if (ea4 > -0.2 && ea4 > ea1 + 0.1) {
+            ancId = 505; // Northern Asian
+        }
+        else if (ea1 < -0.6) {
+            ancId = 506; // Northern China
+        }
+        else if (ea1 < -0.1) {
+            ancId = 507; // Southern China
+        }
+        else if (ea1 < 0.5) {
+            ancId = 508; // Southeast Asian
+        }
+        else if (ea2 > -1) {
+            ancId = 509; // Thailand
+        }
+        else {
+            ancId = 510; // Other East Asia
+        }
+    }
+    else if (eu1 < 1.6 && ic2 < -0.25) {
+        // Europe and part of MENA
+      
+        if (ic3 < 3.5 - 3.1 * eu1) {
+            // Europe
+            
+            if (ic3 > -0.3) {
+                ancId = 308; // Other Europe
+            }
+            else if (eu2 > 0.3) {
+                ancId = 301; // Finland
+            }
+            else if (eu3 > -0.4 - eu1) {
+                if (eu3 > eu1 + 1.1) {
+                    ancId = 305; // Northeast Europe
+                }                            
+                else if (eu3 < 1.3 * eu1 - 1.3) {
+                    ancId = 307; // Balkans
+                }
+                else {
+                    ancId = 306; // Southeast Europe
+                }                            
+            }
+            else {
+                if (eu3 < eu1 - 1.0) {
+                    ancId = 304; // South Europe
+                }                            
+                else if (eu2 > -0.75 &&  eu1 < -0.75) {
+                    ancId = 302; // North Europe
+                }                            
+                else {
+                    ancId = 303; // West Europe
+                }                            
+            }
+        }
+        else {
+            // MENA
+          
+            if (ic3 > 0.3) {
+                ancId = 204; // West Asia
+            }
+            else {
+                ancId = 203; // Middle East
+            }
+        }
+    }
+    else if (eu1 > 1.6 && ic2 < 0.4) {
+        if (ic3 < -0.3) {
+            ancId = 201; // North Africa
+        }
+        else {
+            ancId = 203; // Middle East
+        }
+    }
+    else if (eu1 > 2.2 && ic2 < 1.4) {
+          ancId = 202; // Northeast Africa
+    }
+    else if (gd1  > 1.4758) {
+        // Latin American 1
+        
+        if (ic1 < -0.2) {
+            if (gd3 > 0.05) {
+                ancId = 604; // Native American
+            }
+            else {
+                ancId = 603; // Other Latin American
+            }
+        }
+        else {
+            ancId = 800; // Multiple ancestry
+        }
+    }
+    else {
+        // Black backgound
+        
+        if (ic1 < 0.9 * gd1 - 1.36) {
+            ancId = 602; // Latin American 1
+        }
+        else {
+            // West Africa
+            
+            if (af3 < af1 * 4.0 / 3 + 0.4) {
+                if (af3 > 0.5) {
+                    ancId = 106; // Other Africa
+                }
+                else {
+                    if (af1 > 0.6) {
+                        if (af3 > -0.1) {
+                            ancId = 104; // Kenya
+                        }
+                        else {
+                            ancId = 105; // Southern Africa
+                        }
+                    }
+                    else {
+                        ancId = 103;     // Central Africa
+                    }
+                }
+            }
+            else {
+                if (af1 > -0.8 && af2 > -0.6 && af2 < 0.9 * af1 + 0.8) {
+                    ancId = 601; // African American
+                }
+                else {
+                    if (af3 > 0.5) {
+                        ancId = 106; // Other Africa
+                    }
+                    else if (af2 < -0.1) {
+                        ancId = 101; // Nigeria
+                    }
+                    else {
+                        ancId = 102; // West Africa
+                    }
+                }
+            }
+        }
+    } 
+    
+    ancGroupId = ancId;
+}

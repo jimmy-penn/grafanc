@@ -25,12 +25,15 @@ public:
     float gd1, gd2, gd3;
     float ePct, fPct, aPct;    // Ancestry (EUR, AFR, EAS) components of the sample
     float rawPe, rawPf, rawPa; // Raw scores of above percentages
+    int ancGroupId;
+    
     float subPopScores[numSubPopScores];
 
 public:
     GenoSample(string);
     void SetAncestryScores(int, float, float, float, float, float, float, float, float, float, bool);
     void SetSubPopGdScores(float*);
+    void SetGrafAncGroups();
 };
 
 
