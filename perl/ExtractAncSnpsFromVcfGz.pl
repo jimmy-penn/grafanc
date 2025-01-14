@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 my $disclaim = << "EOF";
     ====================================================================================
@@ -106,6 +106,10 @@ print "Found $numVcfFiles vcf files with key word '$keyWord' before an integer.\
 
 my $ancSnpFile = "AncInferSNPs.txt";
 $ancSnpFile = "$pathToScript/data/$ancSnpFile";
+
+#### TODO: move AncSnpFile to right place
+$ancSnpFile = "/home/jinjim/grafsrc/grafanc/cpp/data/AncSnpPopAFs.txt";
+
 unless (-e $ancSnpFile) {
     print "\nERROR: didn't find $ancSnpFile\n";
     exit;

@@ -3,11 +3,11 @@ INCLUDES = -I. -I$(BASEDIR)
 
 #------ Compiler and options -----------------
 CXX = /usr/bin/g++
-CXXFLAGS = -std=c++11 -pthread -g -lm -lz $(INCLUDES) -I /applications/htslib/1.20/ -L /applications/htslib/1.20/lib -lhts -lstdc++
+HTSLIB = ~/htslib/1.20
+CXXFLAGS = -std=c++11 -pthread -g -lm -lz $(INCLUDES) -I $(HTSLIB)/include -L $(HTSLIB)/lib -lhts -lstdc++
 
 HDIR = ./
 SRCDIR = ./
-
 
 #----- Suffix Rules ---------------------------
 .SUFFIXES: .cpp .C .cc

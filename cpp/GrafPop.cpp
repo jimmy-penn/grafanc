@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     outputFile = argv[2];
     
     parameters params = GetParameters(argc, argv);
-    
+
     string fileBase = "";
     cout << "Checking file " << genoDs << "\n";
     
@@ -65,12 +65,13 @@ int main(int argc, char* argv[])
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
 
-    int numThreads = 4; // Default to maximum 4 threads
+    int numThreads = 1; // Default to single thread
     int numCpus = thread::hardware_concurrency();
+    if (params.numThreads && params.numThreads > numThreads) numThreads = params.numThreads;
     if (numThreads > numCpus) numThreads = numCpus;
-    if (params.numThreads && params.numThreads < numThreads) numThreads = params.numThreads;
-    
+
     smpGenoAnc = new SampleGenoAncestry(ancSnps, minAncSnps);
+    
     smpGenoAnc->CalculateSubPopGd0Values();
 
     //// Get number of samples from PLINK fam file or vcf file
@@ -85,13 +86,13 @@ int main(int argc, char* argv[])
     
     int numDsSamples = 0;
     string fileTypeStr = "";
-    
+
     if (fileType == GenoDatasetType::IS_VCF || fileType == GenoDatasetType::IS_VCF_GZ) {
         VcfGrafAncSnpGeno* vcfHead = new VcfGrafAncSnpGeno(genoDs, ancSnps);
         bool headRead = vcfHead->ReadHeaderFromFile();
         numDsSamples = vcfHead->GetTotalVcfSamples();
         fileTypeStr = "VCF";
-        
+
         delete vcfHead;
     }
     else if (fileType == GenoDatasetType::IS_PLINK) {
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
         cout << "Maximum "  << maxMem << " MiB will be used.\n";
         totAllocMem = maxMem;
     }
-    
+
     float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
 
     //// Determine how many rounds are needed for analyzing all samples
@@ -153,7 +154,7 @@ int main(int argc, char* argv[])
     if (memNeeded > totAllocMem) {    
         smpBlockSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
         smpBlockSize = int(smpBlockSize / 100.0) * 100; // Bump down to 100's
-        if (params.numSmpsPerBlock && params.numSmpsPerBlock < smpBlockSize) smpBlockSize = params.numSmpsPerBlock;
+        if (params.samplesPerRound && params.samplesPerRound < smpBlockSize) smpBlockSize = params.samplesPerRound;
         numSmpBlocks = (numDsSamples-1) / smpBlockSize + 1;
         
         cout << numSmpBlocks << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpBlockSize << " samples.\n";
@@ -196,6 +197,7 @@ int main(int argc, char* argv[])
             if (smpGenoAnc->HasEnoughAncestrySnps(numAncSnps)) {
                 smpGenoAnc->SetGenoSamples(vcfGeno->vcfSamples);
                 smpGenoAnc->SetSnpGenoData(&vcfGeno->vcfAncSnpIds, &vcfGeno->vcfAncSnpCodedGenos);
+                vcfGeno->ShowSummary();
             }
             else {
                 cout << "\nWARNING: Ancestry inference not done due to lack of genotyped ancestry SNPs "
@@ -387,7 +389,7 @@ parameters GetParameters(int argc, char** argv)
                 if (optarg) {
                     int argVal = atoi(optarg);
                     if (strcmp(options[optIdx].name, "maxmem") == 0)  param.maxMemoryInMb = argVal;
-                    if (strcmp(options[optIdx].name, "samples") == 0) param.numSmpsPerBlock  = argVal;
+                    if (strcmp(options[optIdx].name, "samples") == 0) param.samplesPerRound  = argVal;
                     if (strcmp(options[optIdx].name, "threads") == 0) param.numThreads = argVal;
                 }    
                 break;
@@ -397,9 +399,9 @@ parameters GetParameters(int argc, char** argv)
     
     // Set minimum requied memory and block size
     if (param.maxMemoryInMb > 0 && param.maxMemoryInMb < 100) param.maxMemoryInMb = 100;
-    if (param.numSmpsPerBlock > 0 && param.numSmpsPerBlock < 100) param.numSmpsPerBlock = 100;
-    param.numSmpsPerBlock = int(param.numSmpsPerBlock / 100.0) * 100; // Bump down to 100's
-    
+    if (param.samplesPerRound > 0 && param.samplesPerRound < 100) param.samplesPerRound = 100;
+    param.samplesPerRound = int(param.samplesPerRound / 100.0) * 100; // Bump down to 100's
+
     return param;
 }
 

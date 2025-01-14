@@ -34,7 +34,7 @@ int GetAvailableMemoryInMb();
 int GetAllocatableMemoryInMb();
 
 typedef struct parameters {
-    int numSmpsPerBlock; // Number of samples analyzed in each round 
+    int samplesPerRound; // Number of samples analyzed in each round 
     int numThreads;      // Maximum threads to use
     int maxMemoryInMb;   // Maximum memory to use
 } parameters;

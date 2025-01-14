@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 my $disclaim = << "EOF";
     ====================================================================================
@@ -38,7 +38,6 @@ BEGIN {
 use strict;
 use GrafPopFiles;
 use GraphParameters;
-use PopulationCutoffs;
 use GraphTransformation;
 use SubjectAncestry;
 

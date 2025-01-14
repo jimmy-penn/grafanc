@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl -w
 
 ###################################################################################################
 #
@@ -11,7 +11,6 @@ use strict;
 use Carp;
 use Cwd 'abs_path';
 use File::Path qw(make_path remove_tree);
-use Getopt::Long::Descriptive;
 use Time::HiRes qw(gettimeofday);
 
 my $script = $0;

@@ -177,10 +177,15 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     bedFilePtr.close();
     numBimAncSnps = bimAncSnpNo;
 
-    cout << "Read genotypes of " << bimAncSnpNo << " Ancestry SNPs from total " << numBimSnps << " SNPs.\n";
-    cout << "Bed file has genotypes of " << numBimSnps << " SNPs. Read genotypes of "
-         << numBimAncSnps << " ancestry SNPs for " << numSamples << " samples.\n";
-
+    cout << "Bim file has " << numBimSnps << " SNPs. " << bimAncSnpNo << " SNPs are GrafAnc ancestry SNPs.\n";
+    cout << "Reading genotypes of " << numSamples << " samples from bed file.\n";
+    if (fileLen != expFileLen) {
+        cout << "\n**************************************** WARNING ****************************************\n";
+        cout << "Bed file has " << fileLen << " bytes, but is expected to have " << expFileLen << " bytes based on fam and bim files.\n";
+        cout << "Please check the PLINK set to make sure nothing is wrong.\n";
+        cout << "*****************************************************************************************\n";
+    }
+    
     return 0;
 }
 

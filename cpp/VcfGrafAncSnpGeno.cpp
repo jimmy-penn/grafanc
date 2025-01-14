@@ -155,7 +155,7 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verb
         // Testing
         if (snpNo < 0) {        
             cout << "chr " << chr << " pos " << pos << " rs " << rsNum << " ref " << gRef << " alt " << gAlt << " GT: " << ngt;
-            cout << " rsSnpId " << rsSnpId << " 37Id " << gb37SnpId << " 38Id " << gb38SnpId;
+            cout << " rsSnpId " << rsSnpId << " 37Id " << gb37SnpId << " 38Id " << gb38SnpId << "\n";
         }
         
         if (ngt == totVcfSamples * 2) {
@@ -214,6 +214,10 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verb
                     gtVals.push_back(charGeno);
                 }
 
+                if (snpNo < 0 || rsNum == 28487995) {
+                  cout << "\n";
+                }
+                
                 vcfAncSnpGtVals.push_back(gtVals);
             }
             
@@ -260,7 +264,7 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
         ancSnpType = AncestrySnpType::GB38;
         maxVcfAncSnps = numGb38AncSnps;
     }
-    
+
     int saveSnpNo = 0; // Putative SNPs saved after vcf file was read
     int ancSnpNo = 0;  // Final list of ancestry SNPs to be used for ancestry inference
     
@@ -272,13 +276,14 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
         base = base << 1;
     }
 
+    map<int, int> allAncSnpIds;
     for (saveSnpNo = 0; saveSnpNo < putativeAncSnps; saveSnpNo++) {
         int ancSnpId = -1;
         if      (ancSnpType == AncestrySnpType::RSID) ancSnpId = vcfRsIdAncSnpIds[saveSnpNo];
         else if (ancSnpType == AncestrySnpType::GB37) ancSnpId = vcfGb37AncSnpIds[saveSnpNo];
         else if (ancSnpType == AncestrySnpType::GB38) ancSnpId = vcfGb38AncSnpIds[saveSnpNo];
 
-        if (ancSnpId > -1) {
+        if (ancSnpId > -1 && !allAncSnpIds[ancSnpId]) {
             char eRef = ancSnps->snps[ancSnpId].ref;
             char eAlt = ancSnps->snps[ancSnpId].alt;
 
@@ -326,29 +331,34 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
                 vcfAncSnpCodedGenos.push_back(smpGenos);
                 vcfAncSnpGtVals[saveSnpNo].clear();
                 
+                allAncSnpIds[ancSnpId] = 1;
+                
                 ancSnpNo++;
             }
         }
     }
+    cout << "Total " << ancSnpNo << " SNPs in vcf. " << ancSnpNo << " SNPs have expected alleles.\n";
     
     DeleteAncSnpGtValues();
 }
 
 void VcfGrafAncSnpGeno::ShowSummary()
 {
-    cout << "\nTotal " << totAncSnps << " SNPs in Anc AF file. Totatl " << totVcfSnps << " ancestry SNPs used by GrafPop\n";
-
-    cout << "Number of samples found in the vcf file: " << numSamples << "\n";
-    if (numSamples > 0) {
-        int numShowSmps = 10;
-        cout << "Top " << numShowSmps << " samples: ";
-        for (int i = 0; i < numShowSmps; i++) {
-            if (i < numSamples) {
-                cout << vcfSamples[i] << " ";
-            }
-        }
-        cout << "\n";
-    }
+//    int numBadAncSnps = numBimAncSnps - numGoodAncSnps;
+    
+    string showSnpType = "RS IDs";
+    if      (ancSnpType == AncestrySnpType::GB37) showSnpType = "GRCh 37 chromosome positions";
+    else if (ancSnpType == AncestrySnpType::GB38) showSnpType = "GRCh 38 chromosome positions";
+    
+    cout << "Total " << totVcfSnps << " SNPs in vcf file. " << numVcfAncSnps << " SNPs are ancestry SNPs.\n";
+    cout << "\t" << showSnpType << " are used to find ancestry SNPs.\n";
+//    cout << "\t" << numGoodAncSnps << " SNPs have expected alleles and will be used for ancestry inference.\n";
+//    if (numDupAncSnps > 0) cout << "\t" << numDupAncSnps << " ancestry SNPs have multiple entries.\n";
+    
+//    if (numBadAncSnps > 0) {
+//      cout << "\t" << numBadAncSnps << " ancestry SNPs do not have expected alleles.\n";
+//    }
+    cout << "\n";
 }
 
 void VcfGrafAncSnpGeno::CompareAncestrySnpAlleles(const string refStr, const string altsStr,
@@ -370,7 +380,8 @@ void VcfGrafAncSnpGeno::CompareAncestrySnpAlleles(const string refStr, const str
         else if (ref == eAlt || fRef == eAlt) {
             *expAltIdx = 0;
         }
-        
+
+                
         // If ref seems to be flipped, then all the alts are flipped
         bool flip = false;
         if (fRef == eRef || fRef == eAlt) {

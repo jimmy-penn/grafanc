@@ -1,7 +1,7 @@
-# This file is read/parsed by test_grafpop.pl
+# This file is read/parsed by test_grafanc.pl
 # It includes the following pipe (|) delimited columns:
 
-# Test Name | Executable | Input File | Race File | Options | Output File | IFile Expected | Output Msg
+# Test Name | Executable | Input File | Race File | Options | Output File | File Expected | Output Msg
 
 # Test Name:     Name of the test case
 # Executable:    Name of the executable being tested
@@ -12,61 +12,145 @@
 # File expected: If the output file is expected to be generated (Y = Yes)
 # Output Msg:    Expected key string included in STDOUT output message
 
-############### The following test cases test C++ program grafpop
+############### The following test cases test C++ program grafanc
 
-# grafpop with a good PLINK set
-GrafPop with PLINK | grafpop | TG_50_2000.bed | | | TG_50_2000_pops.txt | Y | Saved population results
+### Test PLINK sets
 
-# grafpop with PLINK basename
-GrafPop with PLINK basename | grafpop | TG_50_2000 | | | TG_50_2000_pops_base.txt | Y | Saved population results
+# grafanc with TGP PLINK set GB37
+GrafAnc with TGP PLINK GB37 | grafanc | TGP_40_50K_gb37.bed | | --threads 4 | TGP_40_50K_gb37_pops.txt | Y | Saved population results
 
-# grafpop with a vcf file
-GrafPop with VCF | grafpop | TG_26_500.vcf | | | TG_26_500_pops.txt | Y | Saved population results
+# grafanc with TGP PLINK set GB 38
+GrafAnc with TGP PLINK GB38 | grafanc | TGP_40_50K_gb38.bed | | --threads 4 | TGP_40_50K_gb38_pops.txt | Y | Saved population results
 
-# grafpop with a vcf.gz file
-GrafPop with VCF.gz | grafpop | TG_26_500_zip.vcf.gz | | | TG_26_500_pops.txt | Y | Saved population results
+# grafanc with TGP PLINK set RS ID
+GrafAnc with TGP PLINK RS ID | grafanc | TGP_40_50K_rs.bed | | --threads 4 | TGP_40_50K_rs_pops.txt | Y | Saved population results
 
-# grafpop with a vcf file but actual vcf.gz
-GrafPop with VCF wrong extension | grafpop | TG_26_500_gz.vcf | | | TG_26_500_pops_gzvcf.txt | Y | Saved population results
+# grafanc with TGP PLINK set dup subjects
+GrafAnc with TGP PLINK dup sbjs | grafanc | TGP_50_1K_dup_sbjs.bed | | --threads 4 | TGP_50_1K_dup_sbjs_pops.txt | Y | Saved population results
 
-# grafpop with GB37 chr pop in bim
-GrafPop with GB37 | grafpop | TG_10_1000_g37.bed | | | TG_10_1000_g37_pops.txt | Y | GRCh 37 chromosome positions are used 
+# grafanc with TGP PLINK set dup SNPss
+GrafAnc with TGP PLINK dup SNPs | grafanc | TGP_50_1K_dup_SNPs.bed | | --threads 4 | TGP_50_1K_dup_SNPs_pops.txt | Y | Saved population results
 
-# grafpop with GB38 chr pop in bim
-GrafPop with GB38 | grafpop | TG_10_1000_g38.bed | | | TG_10_1000_g38_pops.txt | Y | GRCh 38 chromosome positions are used 
+# grafanc with TGP PLINK set fewer subjects in fam
+GrafAnc with TGP PLINK fewer sbjs | grafanc | TGP_50_1K_few_sbjs.bed | | --threads 4 | TGP_50_1K_few_sbjs_pops.txt | Y | Saved population results
 
-# grafpop with PLINK of not enough ancestry SNPs
-Not enough ancestry SNPs | grafpop | TG_50_20.bed | | | TG_50_2000_pops.txt | | Ancestry inference not done
+# grafanc with TGP PLINK set more subjects in fam
+GrafAnc with TGP PLINK more sbjs | grafanc | TGP_50_1K_more_sbjs.bed | | --threads 4 | TGP_50_1K_more_sbjs_pops.txt | Y | Saved population results
 
-# grafpop with PLINK of not enough genotyped SNPs
-Not enough genotyped SNPs | grafpop | TG_10_120_invalid.bed | | | TG_10_120_pops.txt | | NOTE: None of
+# grafanc with TGP PLINK set with flipped alleles 
+GrafAnc with TGP PLINK flipped sbjs | grafanc | TGP_50_1K_flip3.bed | | --threads 4 | TGP_50_1K_flip3_pops.txt | Y | Saved population results
 
-# grafpop with PLINK of wrong number of samples
-Wrong fam file | grafpop | TG_wrong_smps.bed | | | TG_wrong_smps.txt | | ERROR: Number of genotypes in bed
+# grafanc with TGP PLINK set with multi allele SNPs
+GrafAnc with TGP PLINK multi allele SNPs | grafanc | TGP_50_1K_multi5.bed | | --threads 4 | TGP_50_1K_multi5_pops.txt | Y | Saved population results
 
-# grafpop with PLINK of wrong number of SNPs
-Wrong bim file | grafpop | TG_wrong_snps.bed | | | TG_wrong_snps.txt | | ERROR: Number of genotypes in bed
+# grafanc with TGP PLINK set without fam file
+GrafAnc with TGP PLINK without fam | grafanc | TGP_10_1K_nofam.bed | | | TGP_10_1K_nofam_pops.txt | Y | ERROR: didn't find
 
-# grafpop with PLINK of missing fam
-Missing fam file | grafpop | TG_10_1000_nofam.bed | | | TG_10_1000_nofam.txt | | ERROR: didn't find
+# grafanc with TGP PLINK set without bim file
+GrafAnc with TGP PLINK without bim | grafanc | TGP_10_1K_nobim.bed | | | TGP_10_1K_nobim_pops.txt | Y | ERROR: didn't find
 
-# grafpop with PLINK of missing bim
-Missing bim file | grafpop | TG_10_1000_nobim.bed | | | TG_10_1000_nobim.txt | | ERROR: didn't find
+# grafanc with TGP PLINK call without extention
+GrafAnc with TGP PLINK no ext | grafanc | TGP_40_50K_rs | | --threads 4 | TGP_40_50K_noext_pops.txt | Y | Saved population results
 
-# grafpop with incorrect file name
-Incorrect file name | grafpop | TG_wrong_name.bed | | | TG_wrong_name.txt | | ERROR: Genotype file
 
-# grafpop with invalid vcf file
-Invalid VCF | grafpop | TG_invalid.vcf | | | TG_invalid.txt | | ERROR: didn't find #CHROM row
+### Test VCF files
 
-# grafpop with empty vcf
-Empty VCF | grafpop | TG_empty.vcf | | | TG_empty_vcf.txt | | ERROR: doesn't include samples
+# grafanc with incorrect file name
+Incorrect file name | grafanc | TG_wrong_name.bed | | --threads 4 | TG_wrong_name.txt | | ERROR: Genotype file
 
-# grafpop with no valid SNP vcf
-No ancestry SNP VCF | grafpop | TG_2_invalid_snp_chr23.vcf | | | TG_no_anc_snp_vcf.txt | | WARNING: Ancestry inference not done due to lack of genotyped
+# grafanc with a vcf file
+GrafAnc with VCF.gz | grafanc | TGP_20_10K.vcf | | --threads 4 | TGP_20_10K_pops.txt | Y | Saved population results
 
-# grafpop with wrong sample vcf
-Wrong sample VCF | grafpop | TG_wrong_smps.vcf | | | TG_wrong_smps_vcf.txt | | ERROR is different from #samples
+# grafanc with a vcf.gz GB 37 file
+GrafAnc with VCFGZ GB37 | grafanc | TGP_50_10K_gb37.vcf.gz | | --threads 4 | TGP_50_10K_gb37_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz GB38 file
+GrafAnc with VCFGZ GB38 | grafanc | TGP_50_10K_gb38.vcf.gz | | --threads 4 | TGP_50_10K_gb378_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz RS ID file
+GrafAnc with VCFGZ RS ID | grafanc | TGP_50_10K_rs.vcf.gz | | --threads 4 | TGP_50_10K_rs_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with swaped alleles
+GrafAnc with VCFGZ swap alleles | grafanc | TGP_50_10K_gb37_swap100.vcf.gz | | --threads 4 | TGP_50_10K_swap100_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with swaped alleles and genos
+GrafAnc with VCFGZ swap alleles and genos | grafanc | TGP_50_10K_gb37_swap2.vcf.gz | | --threads 4 | TGP_50_10K_swap2_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with flipped alleles
+GrafAnc with VCFGZ flip alleles | grafanc | TGP_50_10K_gb37_flip3.vcf.gz | | --threads 4 | TGP_50_10K_flip3_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with flipped alt alleles
+GrafAnc with VCFGZ flip alts | grafanc | TGP_50_10K_gb37_flipAlt5.vcf.gz | | --threads 4 | TGP_50_10K_flip5_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with duplicated SNPs
+GrafAnc with VCFGZ dup SNPs | grafanc | TGP_50_10K_gb37_dup20.vcf.gz | | --threads 4 | TGP_50_10K_dup20_pops.txt | Y | Saved population results
+
+# grafanc with a vcf.gz file with multi-alleles
+GrafAnc with VCFGZ multi-alleles | grafanc | TGP_50_10K_gb37_multi10.vcf.gz | | --threads 4 | TGP_50_10K_multi10_pops.txt | Y | Saved population results
+
+# grafanc with a vcf file but actual vcf.gz
+GrafAnc with VCF wrong extension | grafanc | TGP_10_5K_gz.vcf | | | TGP_10_5K_gzvcf_pops.txt | Y | Saved population results
+
+# grafanc with a vcf file without enough ancestry SNPs
+GrafAnc with VCF no enough anc SNPs | grafanc | TGP_26_1K.vcf.gz | | | TGP_26_1K_pops.txt | Y | Ancestry inference not done due to lack
+
+# grafanc with a vcf file without Ancestry SNPs
+GrafAnc with VCF wrong extension | grafanc | TGP_2_invalid_snp_chr23.vcf | | | TGP_2_invalid_snp_chr23_pops.txt | Y | Ancestry inference not done due to lack
+
+
+############### The following test cases test Perl script ExtractAncSnpsFromVcfGz.pl
+
+# Extract ancestry SNP genos from one vcf file
+Extract genos from one vcf | ExtractAncSnpsFromVcfGz.pl | TGP_10_chr4.vcf.gz | | | TGP_10K_chr4_anc.vcf | Y | Results saved to
+
+# Extract ancestry SNP genos from multiple vcf gz files
+Extract genos from multi vcf gz | ExtractAncSnpsFromVcfGz.pl | TGP_10_chr4.vcf.gz | | chr | TGP_10_cmb.vcf | Y | Results saved to
+
+# Extract ancestry SNP genos from multiple vcf files
+Extract genos from multi vcf | ExtractAncSnpsFromVcfGz.pl | TGP_5_chr2.vcf | | chr | TG_5_cmb.vcf | Y | Results saved to
+
+# Extract ancestry SNP genos with wrong keyword
+Extract genos from multi vcf | ExtractAncSnpsFromVcfGz.pl | TGP_5_chr2.vcf | | smp | TG_5_cmb.vcf | Y | ERROR: didn't find keyword
+
+
+END
+
+# grafanc with GB37 chr pop in bim
+GrafAnc with GB37 | grafanc | TG_10_1000_g37.bed | | | TG_10_1000_g37_pops.txt | Y | GRCh 37 chromosome positions are used 
+
+# grafanc with GB38 chr pop in bim
+GrafAnc with GB38 | grafanc | TG_10_1000_g38.bed | | | TG_10_1000_g38_pops.txt | Y | GRCh 38 chromosome positions are used 
+
+# grafanc with PLINK of not enough ancestry SNPs
+Not enough ancestry SNPs | grafanc | TG_50_20.bed | | | TG_50_2000_pops.txt | | Ancestry inference not done
+
+# grafanc with PLINK of not enough genotyped SNPs
+Not enough genotyped SNPs | grafanc | TG_10_120_invalid.bed | | | TG_10_120_pops.txt | | NOTE: None of
+
+# grafanc with PLINK of wrong number of samples
+Wrong fam file | grafanc | TG_wrong_smps.bed | | | TG_wrong_smps.txt | | ERROR: Number of genotypes in bed
+
+# grafanc with PLINK of wrong number of SNPs
+Wrong bim file | grafanc | TG_wrong_snps.bed | | | TG_wrong_snps.txt | | ERROR: Number of genotypes in bed
+
+# grafanc with PLINK of missing fam
+Missing fam file | grafanc | TG_10_1000_nofam.bed | | | TG_10_1000_nofam.txt | | ERROR: didn't find
+
+# grafanc with PLINK of missing bim
+Missing bim file | grafanc | TG_10_1000_nobim.bed | | | TG_10_1000_nobim.txt | | ERROR: didn't find
+
+
+# grafanc with invalid vcf file
+Invalid VCF | grafanc | TG_invalid.vcf | | | TG_invalid.txt | | ERROR: didn't find #CHROM row
+
+# grafanc with empty vcf
+Empty VCF | grafanc | TG_empty.vcf | | | TG_empty_vcf.txt | | ERROR: doesn't include samples
+
+# grafanc with no valid SNP vcf
+No ancestry SNP VCF | grafanc | TG_2_invalid_snp_chr23.vcf | | | TG_no_anc_snp_vcf.txt | | WARNING: Ancestry inference not done due to lack of genotyped
+
+# grafanc with wrong sample vcf
+Wrong sample VCF | grafanc | TG_wrong_smps.vcf | | | TG_wrong_smps_vcf.txt | | ERROR is different from #samples
 
 
 ############### The following test cases test Perl script PlotGrafPopResults.pl
@@ -221,23 +305,6 @@ Save samples with empty pop file | SaveSamples.pl | TG_empty_pops.txt | TGP_SbjS
 # Save samples with large min snps
 Save samples with large min snps | SaveSamples.pl | TG_50_2000_pops.txt | TGP_SbjSuperPop.txt | -minsnp 60000 | TG_50_2000_smps_big_snps.txt | | ERROR: No samples with genotype
 
-
-############### The following test cases test Perl script ExtractAncSnpsFromVcfGz.pl
-
-# Extract ancestry SNP genos from one vcf file
-Extract genos from one vcf | ExtractAncSnpsFromVcfGz.pl | TG_2smps_chr9.vcf | | | TG_smps_chr9_anc.vcf | Y | Results saved to
-
-# Extract ancestry SNP genos from one vcf.gz file
-Extract genos from one vcf.gz | ExtractAncSnpsFromVcfGz.pl | TG_2_zip_chr16.vcf.gz | | | TG_smps_chr16_anc.vcf | Y | Results saved to
-
-# Extract ancestry SNP genos from multiple vcf files
-Extract genos from multi vcf | ExtractAncSnpsFromVcfGz.pl | TG_2smps_chr9.vcf | | chr | TG_smps_chr9_cmb.vcf | Y | Results saved to
-
-# Extract ancestry SNP genos from multiple vcf.gz files
-Extract genos from multi vcf.gz | ExtractAncSnpsFromVcfGz.pl | TG_2_zip_chr17.vcf.gz | | chr | TG_smps_chr17_cmb.vcf | Y | Results saved to
-
-# Extract ancestry SNP genos with wrong keyword
-Extract genos with wrong keyword | ExtractAncSnpsFromVcfGz.pl | TG_2_zip_chr17.vcf.gz | | smps | TG_smps_wrongkey_anc.vcf |  | ERROR: didn't find keyword
 
 
 

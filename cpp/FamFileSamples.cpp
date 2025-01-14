@@ -72,6 +72,9 @@ int FamFileSamples::ReadSamplesFromFile()
     int smpSex, pheno;
     char famId[80], smpId[80], dadId[80], momId[80];
 
+    map<string, int> allSmpIds;
+    string dupSmp = "";
+    
     while (fgets(fpLine, lineLen, ifp) != NULL && fileIsValid == true) {
         sscanf(fpLine, "%s %s %s %s %d %d", famId, smpId, dadId, momId, &smpSex, &pheno);
 
@@ -81,6 +84,14 @@ int FamFileSamples::ReadSamplesFromFile()
             FamSample sample(smpId, dadId, momId, smpSex);
             samples.push_back(sample);
             numFileSmps++;
+            
+            if (allSmpIds[smpId]) {
+                allSmpIds[smpId]++;
+                dupSmp = smpId;
+            }
+            else {
+                allSmpIds[smpId] = 1;
+            }
         }
 
         lineNo++;
@@ -89,6 +100,13 @@ int FamFileSamples::ReadSamplesFromFile()
 
     numFamSmps = numFileSmps;
 
+    if (dupSmp != "") {
+        cout << "\n******************** WARNING *******************************\n";
+        cout << "Fam file includes at least one duplicate sample: " << smpId << ".\n";
+        cout << "Please create unique sample IDs for all genotypes.\n";
+        cout << "************************************************************\n\n";
+    }
+    
     Summarize();
 
     return numFileSmps;
