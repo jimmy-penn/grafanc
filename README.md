@@ -10,7 +10,7 @@ Please refer to the [htslib documentation](https://www.htslib.org) for details.
 
 ### Make C++ binary `grafanc`
 
-If htslib is installed under direcory `~/htslib/1.20/`, GrafAnc can be build by running the following command under the root directory:
+If htslib is installed under direcory `~/htslib/1.20/`, GrafAnc can be built by running the following command under the root directory:
 
 ``` sh
 $ make

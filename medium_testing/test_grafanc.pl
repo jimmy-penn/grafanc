@@ -48,9 +48,8 @@ my $numFailTests = 0;
 
 print "\n";
 if ($updateBaseline) {
-    my $rmCmd = "rm $baselineDir/*.*";
-    print "$rmCmd\n" if ($DEBUG);
-    system($rmCmd);
+    system("rm -rf $baselineDir") if (-e $baselineDir);
+    system("mkdir $baselineDir") 
 }
 
 my @failTests = ();
@@ -64,9 +63,9 @@ for my $testNo (0 .. $#allTests) {
     my $expMsg = $test{stdoutMsg};
 
 
-#### TODO: mv grafanc to the right place
-$testCmd =~ s/^grafanc/\/home\/jinjim\/grafsrc\/grafanc\/cpp\/grafanc/;
-$testCmd =~ s/^ExtractAncSnpsFromVcfGz/\/home\/jinjim\/grafsrc\/grafanc\/perl\/ExtractAncSnpsFromVcfGz/;
+    #### TODO: mv grafanc to the right place
+    $testCmd =~ s/^grafanc/\.\.\/cpp\/grafanc/;
+    $testCmd =~ s/^ExtractAncSnpsFromVcfGz/\.\.\/perl\/ExtractAncSnpsFromVcfGz/;
 
     my $testId = $testNo+ 1;
 
@@ -86,8 +85,8 @@ $testCmd =~ s/^ExtractAncSnpsFromVcfGz/\/home\/jinjim\/grafsrc\/grafanc\/perl\/E
 if ($numFailTests > 0) {
     print "\n\n*********************************  ERROR: $numFailTests tests failed! ********************************\n";
     for my $test (@failTests) {
-	my ($name, $err) = split /\t/, $test;
-	print "Test $name ERROR: $err\n";
+      	my ($name, $err) = split /\t/, $test;
+      	print "Test $name ERROR: $err\n";
     }
     print "\n";
 }
@@ -159,6 +158,10 @@ sub RunTest
                 		$passed = 0;
                 		$error = "Unexpected results found in output file";
           	    }
+      	    }
+      	    else {
+      	        $passed = 0;
+            		$error = "Didn't find output file $fullTestOutFile";
       	    }
       	}
     }
