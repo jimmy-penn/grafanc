@@ -70,7 +70,7 @@ $testCmd =~ s/^ExtractAncSnpsFromVcfGz/\/home\/jinjim\/grafsrc\/grafanc\/perl\/E
 
     my $testId = $testNo+ 1;
 
-    print "Running Test No. $testId: $testName cmd $testCmd\n";
+    print "Running Test No. $testId: $testName\n\tCommand: $testCmd\n";
 
     my ($testPassed, $err, $runTime)  = RunTest($testCmd, $testOutFile, $expOutFile, $expMsg, $outputDir);
     if ($testPassed) {
@@ -151,12 +151,14 @@ sub RunTest
       	    system($cpCmd);
       	}
       	else {
-      	    my $diffCmd = "diff $fullTestOutFile $fullBaselineFile";
-      	    print "$diffCmd\n" if ($DEBUG);
-      	    my $diff = `$diffCmd`;
-      	    if ($diff) {
-            		$passed = 0;
-            		$error = "Unexpected results found in output file";
+      	    if (-e $fullTestOutFile) {
+          	    my $diffCmd = "diff $fullTestOutFile $fullBaselineFile";
+          	    print "$diffCmd\n" if ($DEBUG);
+          	    my $diff = `$diffCmd`;
+          	    if ($diff) {
+                		$passed = 0;
+                		$error = "Unexpected results found in output file";
+          	    }
       	    }
       	}
     }
