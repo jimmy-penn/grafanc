@@ -4,14 +4,17 @@ SampleGenoAncestry *smpGenoAnc = NULL;
 
 int main(int argc, char* argv[])
 {
-    string usage = "Usage: grafanc <Binary PLINK set or VCF file> <output file>\n";
-
+    string usage = "Usage: grafanc <Binary PLINK set or VCF file> <output file> [Options]\n"
+        "\t--maxmem  <size in MiB>:  specify maximum memory in MiB to be used by GrafAnc. Default 8 MiB\n"
+        "\t--threads <number>:       specify maximum number of threads to use. Default 1\n"
+        "\t--samples <number>:       specify maximum samples to be processed in each round\n";
+  
     string disclaimer =
     "\n *==========================================================================="
-    "\n *  GrafAnc: Software to infer subject ancestry from genotypes quickly"
+    "\n *  GrafAnc: Software to infer genetic ancestry at both continental and subcontinetal levels"
     "\n *  Yumi (Jimmy) Jin, PhD"
     "\n *  Jimmy.Jin@Pennmedicine.upenn.edu"
-    "\n *  10/08/2024"
+    "\n *  01/17/2025"
     "\n *"
     "\n *===========================================================================";
 
@@ -60,7 +63,7 @@ int main(int argc, char* argv[])
     int numSnpsInAncFile = ancSnps->ReadAncestrySnpsFromFile(ancSnpFile);
 
     int numSnpsInRefPopFile = ancSnps->ReadRefSubPopSnpsFromFile(refSubPopFile);
-    cout << "Read " << numSnpsInRefPopFile << " SNPs from " << refSubPopFile << "\n"; 
+    cout << "Total " << numSnpsInRefPopFile << " SNPs in " << refSubPopFile << "\n"; 
     
     int totAncSnps = ancSnps->GetNumAncestrySnps();
     int minAncSnps = 100;
@@ -92,7 +95,8 @@ int main(int argc, char* argv[])
         bool headRead = vcfHead->ReadHeaderFromFile();
         numDsSamples = vcfHead->GetTotalVcfSamples();
         fileTypeStr = "VCF";
-
+        cout << "\n";
+        
         delete vcfHead;
     }
     else if (fileType == GenoDatasetType::IS_PLINK) {
@@ -125,9 +129,6 @@ int main(int argc, char* argv[])
         fileTypeStr = "PLINK";
     }
     
-    cout << "Number of samples in " << fileTypeStr << " dataset: " << numDsSamples << "\n";
-    if (fileTypeStr == "PLINK") cout << "File is PLINK\n";    
-
     //// Check available memory
     int availMem = GetAvailableMemoryInMb();
     
@@ -140,7 +141,8 @@ int main(int argc, char* argv[])
         cout << "Maximum "  << maxMem << " MiB will be used.\n";
         totAllocMem = maxMem;
     }
-
+    cout << "\n";
+    
     float genosPerByte = fileTypeStr == "PLINK" ? 2 : 1;
 
     //// Determine how many rounds are needed for analyzing all samples
@@ -150,14 +152,14 @@ int main(int argc, char* argv[])
     int numSmpBlocks = 1;
     int smpBlockSize = numDsSamples;
 
-    cout << "Need memory: " << memNeeded << " MiB\n";
     if (memNeeded > totAllocMem) {    
         smpBlockSize = int(totAllocMem * genosPerByte * 1000000 / totAncSnps);
         smpBlockSize = int(smpBlockSize / 100.0) * 100; // Bump down to 100's
         if (params.samplesPerRound && params.samplesPerRound < smpBlockSize) smpBlockSize = params.samplesPerRound;
         numSmpBlocks = (numDsSamples-1) / smpBlockSize + 1;
         
-        cout << numSmpBlocks << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpBlockSize << " samples.\n";
+        if (numSmpBlocks > 1)
+            cout << numSmpBlocks << " rounds are needed to analyze the " << numDsSamples << " samples. Each round analyzes "  << smpBlockSize << " samples.\n";
     }
 
     VcfGrafAncSnpGeno *vcfGeno = NULL;
@@ -190,8 +192,10 @@ int main(int argc, char* argv[])
             int numVcfSmps = vcfGeno->GetTotalVcfSamples();
             int numChkSmps = vcfGeno->GetNumSamples();
             
-            if (round == 0) cout << "Total " << totVcfSnps << " SNPs in VCF file. " << numAncSnps << " SNPs are ancestry SNPs.\n"; 
-            if (round == 0) cout << "Total " << numVcfSmps << " samples in file.\n";
+            if (round == 0) {
+                cout << "Total " << totVcfSnps << " SNPs, " << numVcfSmps << " samples in VCF file.\n";
+            }
+            
             if (numSmpBlocks > 1) cout << "\tGenotypes read for " << numChkSmps << " samples.\n";
 
             if (smpGenoAnc->HasEnoughAncestrySnps(numAncSnps)) {
@@ -225,7 +229,7 @@ int main(int argc, char* argv[])
                 bool hasErr = bedGeno->ReadGenotypesFromBedFile();
                 
                 if (hasErr) return 0;
-                bedGeno->ShowSummary();
+                // bedGeno->ShowSummary();
                 
                 smpGenoAnc->SetSnpGenoData(&bedGeno->ancSnpSnpIds, &bedGeno->ancSnpSmpGenos);
             }
@@ -235,11 +239,7 @@ int main(int argc, char* argv[])
             }
         }
         
-        cout << "\tDone reading genotypes.\n";
-        gettimeofday(&rtm, NULL);
-        ShowTimeDiff(rt1, rtm);
-        
-        cout << "Launching " << numThreads << " threads to calculate ancestry scores.\n";
+        if (numThreads > 1) cout << "Launching " << numThreads << " threads to calculate ancestry scores.\n";
         smpGenoAnc->SetNumThreads(numThreads);
     
         mutex iomutex;
@@ -267,10 +267,6 @@ int main(int argc, char* argv[])
         if (hasBedGeno) delete bedGeno;
         
         smpGenoAnc->ResetSamples();
-
-        cout << "\tResults saved to " << outputFile << "\n";
-        gettimeofday(&rt2, NULL);
-        ShowTimeDiff(rtm, rt2);
     }
     cout << "\n";
     

@@ -326,21 +326,21 @@ void AncestrySnps::ShowAncestrySnps()
             for (int j = 0; j < numVtxPops; j++) cout << " Vtx " << j << " = " << snp.vtxPopAfs[j];
             cout << "\n";
         }
-    }
 
-    cout << "Positions (x, y, z coordinates) of the three vertices when all SNPs have genotypes:\n";
-    printf("\tE:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[0].e, vtxPopExpGds[0].f, vtxPopExpGds[0].a);
-    printf("\tF:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[1].e, vtxPopExpGds[1].f, vtxPopExpGds[1].a);
-    printf("\tA:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[2].e, vtxPopExpGds[2].f, vtxPopExpGds[2].a);
-
-    cout << "\nExpected genetic distances\n";
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            cout << i << "-" << j << ": ";
-            for (int k = 0; k < 5; k++) {
-                cout << vtxExpGenoDists[i][j][k] << " ";
+        cout << "Positions (x, y, z coordinates) of the three vertices when all SNPs have genotypes:\n";
+        printf("\tE:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[0].e, vtxPopExpGds[0].f, vtxPopExpGds[0].a);
+        printf("\tF:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[1].e, vtxPopExpGds[1].f, vtxPopExpGds[1].a);
+        printf("\tA:  %5.4f  %5.4f  %5.4f\n", vtxPopExpGds[2].e, vtxPopExpGds[2].f, vtxPopExpGds[2].a);
+    
+        cout << "\nExpected genetic distances\n";
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                cout << i << "-" << j << ": ";
+                for (int k = 0; k < 5; k++) {
+                    cout << vtxExpGenoDists[i][j][k] << " ";
+                }
+                cout << "\n";
             }
-            cout << "\n";
         }
     }
 }

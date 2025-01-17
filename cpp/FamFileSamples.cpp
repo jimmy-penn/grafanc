@@ -48,9 +48,6 @@ void FamFileSamples::ShowSummary()
 {
     bool success = false;
     cout << "Total " << numFamSmps << " samples in fam file " << filename << ".\n";
-    cout << "\t" << numMales << " males\n";
-    cout << "\t" << numFemales << " females\n";
-    cout << "\n";
 }
 
 int FamFileSamples::ReadSamplesFromFile()

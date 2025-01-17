@@ -141,7 +141,6 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     }
 
     if (hasErr) return hasErr;
-    cout << "Reading genotypes from " << bedFile << "\n";
 
     char buff[snpTotBytes];             // Reusable memory to keep the genotypes
     int bimAncSnpNo = 0;
@@ -178,7 +177,8 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     numBimAncSnps = bimAncSnpNo;
 
     cout << "Bim file has " << numBimSnps << " SNPs. " << bimAncSnpNo << " SNPs are GrafAnc ancestry SNPs.\n";
-    cout << "Reading genotypes of " << numSamples << " samples from bed file.\n";
+    cout << "Read genotypes of " << numSamples << " samples from bed file.\n";
+    cout << "\n";
     if (fileLen != expFileLen) {
         cout << "\n**************************************** WARNING ****************************************\n";
         cout << "Bed file has " << fileLen << " bytes, but is expected to have " << expFileLen << " bytes based on fam and bim files.\n";

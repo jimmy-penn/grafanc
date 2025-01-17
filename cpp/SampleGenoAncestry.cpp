@@ -117,7 +117,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     }
 
     string vtxTitle = "Positions (x, y, z coordinates) of the three vertices";
-    vtxExpGd0->ShowPositions(vtxTitle);
+    // vtxExpGd0->ShowPositions(vtxTitle);
 
     FILE *ifp = NULL;
     if (isAppend) ifp = fopen(outFile.c_str(), "a");

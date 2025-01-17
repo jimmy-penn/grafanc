@@ -64,8 +64,6 @@ int BimFileAncestrySnps::CompareAncestrySnpAlleles(const char a1, const char a2,
 
 int BimFileAncestrySnps::ReadAncestrySnpsFromFile(string bimFile, AncestrySnps* ancSnps)
 {
-    cout << "Reading SNPs from file " << bimFile << "\n";
-
     ASSERT(FileExists(bimFile.c_str()), "File " << bimFile << " does not exist.");
 
     filename = bimFile;

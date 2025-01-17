@@ -120,7 +120,7 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verb
     }
     
     numGenoChars = (numSamples - 1) / 4 + 1; // Save 4 genotypes to one char
-    cout << "\tVcf file has " << totVcfSamples << " samples. " << numSamples << " samples were read to memory\n";
+    if (numSamples < totVcfSamples) cout << numSamples << " samples were read to memory";
 
     bcf1_t *record = bcf_init();
 
@@ -214,10 +214,6 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verb
                     gtVals.push_back(charGeno);
                 }
 
-                if (snpNo < 0 || rsNum == 28487995) {
-                  cout << "\n";
-                }
-                
                 vcfAncSnpGtVals.push_back(gtVals);
             }
             
@@ -239,7 +235,7 @@ bool VcfGrafAncSnpGeno::ReadDataFromFile(int stSbjNo, int numReadSbjs, bool verb
         }
     }
 
-    cout << "Done. Checked " << snpNo << " SNPs. Found " << putativeAncSnps << " SNPs with ancestry SNPs\n";
+    cout << "Checked " << snpNo << " SNPs. Found " << putativeAncSnps << " SNPs with ancestry SNPs\n";
     totVcfSnps = snpNo;
     
     bcf_destroy(record);
@@ -337,7 +333,7 @@ void VcfGrafAncSnpGeno::RecodeSnpGenotypes()
             }
         }
     }
-    cout << "Total " << ancSnpNo << " SNPs in vcf. " << ancSnpNo << " SNPs have expected alleles.\n";
+//    cout << "Total " << ancSnpNo << " SNPs in vcf. " << ancSnpNo << " SNPs have expected alleles.\n";
     
     DeleteAncSnpGtValues();
 }
@@ -350,7 +346,6 @@ void VcfGrafAncSnpGeno::ShowSummary()
     if      (ancSnpType == AncestrySnpType::GB37) showSnpType = "GRCh 37 chromosome positions";
     else if (ancSnpType == AncestrySnpType::GB38) showSnpType = "GRCh 38 chromosome positions";
     
-    cout << "Total " << totVcfSnps << " SNPs in vcf file. " << numVcfAncSnps << " SNPs are ancestry SNPs.\n";
     cout << "\t" << showSnpType << " are used to find ancestry SNPs.\n";
 //    cout << "\t" << numGoodAncSnps << " SNPs have expected alleles and will be used for ancestry inference.\n";
 //    if (numDupAncSnps > 0) cout << "\t" << numDupAncSnps << " ancestry SNPs have multiple entries.\n";
