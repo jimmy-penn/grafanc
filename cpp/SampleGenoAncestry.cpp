@@ -126,7 +126,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     if(ifp) {
         char line[512];
         if (!isAppend) {
-            sprintf(line, "%s\t%s\t%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs", "#HeteroSNPs", "HeteroRate");
+            sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
             }
@@ -140,7 +140,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             GenoSample smp = samples[i];
             if (!smp.ancIsSet) continue;
 
-            sprintf(line, "%s\t%6d\t%6d\t%5.4f", smp.name.c_str(), smp.numAncSnps, smp.numHetSnps, smp.hetRate);
+            sprintf(line, "%s\t%5.4f", smp.name.c_str(), smp.numAncSnps);
             sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);

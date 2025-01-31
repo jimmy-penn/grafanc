@@ -10,13 +10,13 @@ int main(int argc, char* argv[])
         "\t--samples <number>:       specify maximum samples to be processed in each round\n";
   
     string disclaimer =
-    "\n *==========================================================================="
+    "\n *=========================================================================================="
     "\n *  GrafAnc: Software to infer genetic ancestry at both continental and subcontinetal levels"
     "\n *  Yumi (Jimmy) Jin, PhD"
     "\n *  Jimmy.Jin@Pennmedicine.upenn.edu"
     "\n *  01/17/2025"
     "\n *"
-    "\n *===========================================================================";
+    "\n *==========================================================================================";
 
     if (argc < 3) {
         cout << usage << "\n";

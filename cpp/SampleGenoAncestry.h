@@ -58,26 +58,25 @@ public:
     vector<GenoSample> samples;
     vector<int> *ancSnpIds;
     vector<unsigned char*> *ancSnpCodedGenos; // Use char, instead of int, to save space
-    
-    //                                            0         1          2            3         4          5          6        7         8   
+
+    //                                             0          1        2           3          4        5           6        7         8   
     const string ancSnpFileCols[numSubPops] = {"UKBBEUR", "UKBBAFR", "UKBBEAS", "Nigeria", "Ghana", "Zimbabwe", "Uganda", "Iran", "Barbados", 
                                      
-    //        9       10            11            12        13       14       15                                           
-          "China", "Turkey", "Philippines", "Thailand",  "Japan",  "Nepal",  "LLE",
-                                     
-    //       16           17           18         19        20      21       22         23       24       25        26         27        28                                 
-         "Pakistan", "Bangladesh", "SriLanka", "India2",  "BRS", "Irish", "Greece", "Finland", "Italy",  "PUR", "Portugal", "UKBSAS", "UKBMEX",
-    
-    //      29        30         31        32        33                                         
-          "Spain", "France", "Poland", "Germany", "Czech"};
-    
+    //        9         10            11        12       13        14            15          16          17                                              
+          "China", "Philippines", "Thailand", "Japan", "Nepal", "Pakistan", "Bangladesh", "SriLanka", "India2", 
+
+    //       18       19         20       21        22        23        24        25               
+          "Irish", "Finland", "Italy", "TGPPUR", "TGPSAS", "TGPMEX", "France", "Poland"};
+          
+
     const string popScoreNames[numSubPopScores] = {"EA1", "EA2", "EA3", "EA4", "AF1", "AF2", "AF3", "EU1", "EU2", "EU3", "SA1", "SA2", "IC1", "IC2", "IC3"};
     
     // Pair of ref pops to use for each score   
     //                                         EA1 EA2 EA3 EA4 AF1 AF2 AF3 EU1 EU2 EU3 SA1 SA2 IC1 IC2 IC3
-    const int scorePopIdx1[numSubPopScores] = { 9,  9,  9,  9,  3,  3,  6, 21, 21, 30, 18, 19, 28, 24, 24};
-    const int scorePopIdx2[numSubPopScores] = {12, 13, 11, 14,  5,  4,  8, 24, 23, 31, 17, 16, 27, 25,  7};
     
+    const int scorePopIdx1[numSubPopScores] = { 9,  9,  9,  9,  3,  3,  6, 18, 18, 24, 16, 17, 23, 20, 20};
+    const int scorePopIdx2[numSubPopScores] = {11, 12, 10, 13,  5,  4,  8, 20, 19, 25, 15, 14, 22, 21,  7};
+
     // Expected GD scores of subpopulations when all SNPs are included
     float subPopGd0P1[numSubPopScores];
     float subPopGd0P2[numSubPopScores];
