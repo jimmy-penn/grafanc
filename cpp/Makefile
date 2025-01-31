@@ -17,7 +17,7 @@ SRCDIR = ./
 
 #----- File Dependencies ----------------------
 
-SRC = Util.cpp AncestrySnps.cpp VcfGrafAncSnpGeno.cpp FamFileSamples.cpp BimFileAncestrySnps.cpp BedFileSnpGeno.cpp SampleGenoDist.cpp SampleGenoAncestry.cpp  GrafPop.cpp
+SRC = Util.cpp AncestrySnps.cpp VcfGrafAncSnpGeno.cpp FamFileSamples.cpp BimFileAncestrySnps.cpp BedFileSnpGeno.cpp SampleGenoDist.cpp SampleGenoAncestry.cpp  GrafAnc.cpp
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
