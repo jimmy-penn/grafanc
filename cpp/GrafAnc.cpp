@@ -1,4 +1,4 @@
-#include "GrafPop.h"
+#include "GrafAnc.h"
 
 SampleGenoAncestry *smpGenoAnc = NULL;
 

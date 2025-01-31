@@ -1,7 +1,7 @@
 using namespace std;
 
-#ifndef GRAFPOP_H
-#define GRAFPOP_H
+#ifndef GRAFANC_H
+#define GRAFANC_H
 
 #include <getopt.h>
 #include "Util.h"
