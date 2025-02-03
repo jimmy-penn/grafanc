@@ -5,7 +5,7 @@ See `GrafAnc_README.md` for GrafAnc software documentation.
 
 ### Required libraries
 
-GrafAnc requires htslib be installed on the system.
+GrafAnc requires that htslib be installed on the system.
 Please refer to the [htslib documentation](https://www.htslib.org) for details.
 
 ### Make C++ binary `grafanc`

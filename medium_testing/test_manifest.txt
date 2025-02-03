@@ -101,7 +101,7 @@ GrafAnc with VCF wrong extension | grafanc | TGP_2_invalid_snp_chr23.vcf | | | T
 ############### The following test cases test Perl script ExtractAncSnpsFromVcfGz.pl
 
 # Extract ancestry SNP genos from one vcf file
-Extract genos from one vcf | ExtractAncSnpsFromVcfGz.pl | TGP_10_chr4.vcf.gz | | | TGP_10K_chr4_anc.vcf | Y | Results saved to
+Extract genos from one vcf | ExtractAncSnpsFromVcfGz.pl | TGP_10_chr4.vcf.gz | | | TGP_10_chr4_anc.vcf | Y | Results saved to
 
 # Extract ancestry SNP genos from multiple vcf gz files
 Extract genos from multi vcf gz | ExtractAncSnpsFromVcfGz.pl | TGP_10_chr4.vcf.gz | | chr | TGP_10_cmb.vcf | Y | Results saved to

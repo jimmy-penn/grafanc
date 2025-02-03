@@ -5,9 +5,9 @@ SampleGenoAncestry *smpGenoAnc = NULL;
 int main(int argc, char* argv[])
 {
     string usage = "Usage: grafanc <Binary PLINK set or VCF file> <output file> [Options]\n"
-        "\t--maxmem  <size in MiB>:  specify maximum memory in MiB to be used by GrafAnc. Default 8 MiB\n"
-        "\t--threads <number>:       specify maximum number of threads to use. Default 1\n"
-        "\t--samples <number>:       specify maximum samples to be processed in each round\n";
+        "\t--maxmem  <size in MB>:  specify maximum memory in MB to be used by GrafAnc. Default 8 MB\n"
+        "\t--threads <number>:      specify maximum number of threads to use. Default 1\n"
+        "\t--samples <number>:      specify maximum samples to be processed in each round\n";
   
     string disclaimer =
     "\n *=========================================================================================="
@@ -136,9 +136,9 @@ int main(int argc, char* argv[])
     if (params.maxMemoryInMb) maxMem = params.maxMemoryInMb;
     
     int totAllocMem = GetAllocatableMemoryInMb();
-    cout << "Available memory: " << totAllocMem << " MiB\n";
+    cout << "Available memory: " << totAllocMem << " MB\n";
     if (totAllocMem > maxMem) {
-        cout << "Maximum "  << maxMem << " MiB will be used.\n";
+        cout << "Maximum "  << maxMem << " MB will be used.\n";
         totAllocMem = maxMem;
     }
     cout << "\n";
@@ -304,8 +304,9 @@ string FindFile(string filename)
     fullFile = exeDir + "/" + filename;
     if (FileExists(fullFile.c_str())) return fullFile;
 
-    if(const char* grafPath = getenv("GRAFPATH")) {
+    if (const char* grafPath = getenv("GRAFPATH")) {
         string grafDir = string(grafPath);
+      
         fullFile = grafDir + "/data/" + filename;
         if (FileExists(fullFile.c_str())) return fullFile;
 
