@@ -156,7 +156,7 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 405        | Bangladesh           | Bangladesh, TGP-BEB                                                                                                                                   |
 | 501        | Japan Ryukyu         |                                                                                                                                                       |
 | 502        | Japan Main Islands   | HGDP-Japanese, Japan, TGP-JPT                                                                                                                         |
-| 503        | Korea                | Korea                                                                                                                                                 |
+| 503        | Korea                | South Korea, North Korea                                                                                                                              |
 | 504        | Northern Asia        | Kyrgyzstan, Mongolia, Nepal, HGDP-Hazara, HGDP-Uygur, HGDP-Yakut                                                                                      |
 | 505        | Northern China 1     | HGDP-Daur, HGDP-Hezhen, HGDP-Mongolian, HGDP-Naxi, HGDP-Oroqen, HGDP-Tu, HGDP-Xibo, HGDP-Yi                                                           |
 | 506        | Northern China 2     | China, HGDP-Northern Han, TGP-CHB                                                                                                                     |
@@ -224,9 +224,9 @@ GrafAnc scores can be visualized using 2D or 3D scatterplots. Although any combi
 | EA1    | EA4    | East Asian and Southeast Asian subpopulations                   |
 | SA1    | SA2    | South Asian subpopulations                                      |
 
-### UKBB GrafAnc results used as references
+### Using UKBB, 1KGP, HGDP GrafAnc results as references
 
-GrafAnc results obtained using different data sets can be combined and plotted on the same scatterplot. We combined the results obtained using UKBB, 1KGP and HGDP and calculated the mean values for each subcontinental population, after removing outliers. The results are saved to `PopMeanScores.txt (to be added)`. Users can combine these results to those obtained using their own data, no matter what variants are included.
+GrafAnc results obtained using different data sets can be combined and plotted on the same scatterplot. We combined the results obtained using UKBB, 1KGP and HGDP and calculated the mean values for each subcontinental population, after removing outliers. The results are saved to `PopMeanScores.txt`. Users can combine these results to those obtained using their own data, no matter what variants are included. Note that some of the scores in the table are left empty, which is because these populations were used as training sets for calculating these scores.
 
 ## References
 
