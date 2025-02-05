@@ -94,7 +94,7 @@ $ ExtractAncSnpsFromVcfGz.pl ../medium_testing/input/TGP_10_chr4.vcf.gz results/
 $ grafanc results/TGP_10_cmb.vcf results/TGP_10_cmb_pops.txt
 ```
 
-The above command extracts genotypes of ancestry SNPs from the four files with name like "TGP_10_chr\<`number>`.vcf.gz" and save the results to the output file "TGP_10_cmb.vcf".
+The above command extracts genotypes of ancestry SNPs from the four files with name like "TGP_10_chr\<`number>`.vcf.gz" and save the results to the output file `TGP_10_cmb.vcf`.
 
 ### Output files
 
