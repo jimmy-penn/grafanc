@@ -177,28 +177,28 @@ The ancestry group assignment was made based on the reference data from UKBB, 1K
 
 When assigning ancestry groups, GrafAnc assumes there are enough (see above) ancestry SNPs with non-missing genotypes in the input data set. When there are fewer SNPs with genotypes, the ancestry group assignments are less reliable. In order to estimate the variance of the GrafAnc scores when difference number of genotyped ancestry SNPs are available, we tested GrafAnc using 1KGP data and randomly setting some genotypes as missing. As expected, the standard deviations of a GrafAnc scores are directly proportional to the inverse of numbers of SNPs with non-missing genotypes. We have done linear regression analysis and obtained the parameters for all GrafAnc scores:
 
-| Score | *a*     | *b*     |
-|-------|---------|---------|
-| GD1   | -0.0001 | 0.8253  |
-| GD2   | -0.0001 | 0.9477  |
-| GD3   | -0.0002 | 1.3086  |
-| EA1   | -0.0023 | 17.9369 |
-| EA2   | -0.0021 | 20.6769 |
-| EA3   | -0.0018 | 12.7447 |
-| EA4   | -0.0038 | 15.2952 |
-| AF1   | -0.0035 | 30.0811 |
-| AF2   | -0.0025 | 46.8876 |
-| AF3   | -0.0020 | 18.1101 |
-| EU1   | -0.0028 | 17.7436 |
-| EU2   | -0.0014 | 14.5588 |
-| EU3   | -0.0016 | 22.4241 |
-| SA1   | -0.0030 | 21.8517 |
-| SA2   | -0.0009 | 12.0068 |
-| IC1   | -0.0008 | 6.8263  |
-| IC2   | -0.0008 | 10.9547 |
-| IC3   | -0.0017 | 15.9932 |
+| Score | *a*     | *b*   |
+|-------|---------|-------|
+| GD1   | -0.0001 | 0.83  |
+| GD2   | -0.0001 | 0.95  |
+| GD3   | -0.0002 | 1.31  |
+| EA1   | -0.0023 | 17.94 |
+| EA2   | -0.0021 | 20.68 |
+| EA3   | -0.0018 | 12.74 |
+| EA4   | -0.0038 | 15.30 |
+| AF1   | -0.0035 | 30.08 |
+| AF2   | -0.0025 | 46.89 |
+| AF3   | -0.0020 | 18.11 |
+| EU1   | -0.0028 | 17.74 |
+| EU2   | -0.0014 | 14.56 |
+| EU3   | -0.0016 | 22.42 |
+| SA1   | -0.0030 | 21.85 |
+| SA2   | -0.0009 | 12.01 |
+| IC1   | -0.0008 | 6.83  |
+| IC2   | -0.0008 | 10.95 |
+| IC3   | -0.0017 | 15.99 |
 
-For each score calculated from a sample, let *n* be the number SNPs with non-missing ancestry SNPs, the standard deviation $\sigma$ can be estimated using the following equation:
+For each score calculated from a sample, let *n* be the number of SNPs with non-missing ancestry SNPs, the standard deviation $\sigma$ can be estimated using the following equation:
 
 $\sigma$ = *a* + *b* / $\sqrt{n}$
 
@@ -226,8 +226,4 @@ GrafAnc scores can be visualized using 2D or 3D scatterplots. Although any combi
 
 ### Using UKBB, 1KGP, HGDP GrafAnc results as references
 
-GrafAnc results obtained using different data sets can be combined and plotted on the same scatterplot. We combined the results obtained using UKBB, 1KGP and HGDP and calculated the mean values for each subcontinental population, after removing outliers. The results are saved to `PopMeanScores.txt`. Users can combine these results to those obtained using their own data, no matter what variants are included. Note that some of the scores in the table are left empty, which is because these populations were used as training sets for calculating these scores.
-
-## References
-
-Jin Y, Schäffer AA, Feolo M, Holmes JB and Kattman BL (2019). [GRAF-pop: A Fast Distance-based Method to Infer Subject Ancestry from Multiple Genotype Datasets without Principal Components Analysis.](https://www.g3journal.org/content/9/8/2447.long) G3: Genes \| Genomes \| Genetics. August 1, 2019 vol. 9 no. 8 2447-2461.
+GrafAnc results obtained using different data sets can be combined and plotted on the same scatterplot. We combined the results obtained using UKBB, 1KGP and HGDP and calculated the mean values for each subcontinental population, after removing outliers. The results are saved to [PopMeanScores.txt](https://github.com/jimmy-penn/grafanc/blob/master/PopMeanScores.txt). Users can combine these results to those obtained using their own data, no matter what variants are included. Note that some of the scores in the table are left empty, which is because these populations were used as training sets for calculating these scores.

@@ -1,5 +1,17 @@
 #include "GrafAnc.h"
 
+// ==========================================================================================
+//  GrafAnc: Software to infer genetic ancestry at both continental and subcontinetal levels
+//
+//  Yumi (Jimmy) Jin, PhD
+//  Jimmy.Jin@Pennmedicine.upenn.edu
+//
+//  Department of Pathology and Laboratory Medicine, Perelman School of Medicine, 
+//  University of Pennsylvania, Philadelphia, Pennsylvania, USA 
+//
+//  02/05/2025
+// ==========================================================================================
+
 SampleGenoAncestry *smpGenoAnc = NULL;
 
 int main(int argc, char* argv[])
@@ -9,15 +21,6 @@ int main(int argc, char* argv[])
         "\t--threads <number>:      specify maximum number of threads to use. Default 1\n"
         "\t--samples <number>:      specify maximum samples to be processed in each round\n";
   
-    string disclaimer =
-    "\n *=========================================================================================="
-    "\n *  GrafAnc: Software to infer genetic ancestry at both continental and subcontinetal levels"
-    "\n *  Yumi (Jimmy) Jin, PhD"
-    "\n *  Jimmy.Jin@Pennmedicine.upenn.edu"
-    "\n *  01/17/2025"
-    "\n *"
-    "\n *==========================================================================================";
-
     if (argc < 3) {
         cout << usage << "\n";
         exit(0);
