@@ -1,6 +1,6 @@
 # GrafAnc Source Code
 
-GrafAnc source code includes C++ programs and Perl scripts. See [htslib documentation](https://github.com/jimmy-penn/grafanc/tree/master/GrafAncDocumentation.md) for software documentation.
+GrafAnc source code includes C++ programs and Perl scripts. See [GrafAnc documentation](https://github.com/jimmy-penn/grafanc/tree/master/GrafAncDocumentation.md) for software documentation.
 
 ### Required libraries and files
 

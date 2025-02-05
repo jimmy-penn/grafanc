@@ -165,8 +165,8 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 509        | Thailand             | Laos, Thailand, HGDP-Cambodian                                                                                                                        |
 | 510        | Other East Asia      |                                                                                                                                                       |
 | 601        | African American     | Antigua, Aruba, Barbados, Caribbean, Guianas, West Indies, TGP-ACB, TGP-ASW                                                                           |
-| 602        | Latin America 1      | Brazil, TGP-PUR                                                                                                                                       |
-| 603        | Latin America 2      | Argentina, Bolivia, Chile, Colombia, Ecuador, Mexico, Peru, Venezuela, TGP-CLM, TGP-MXL                                                               |
+| 602        | Latin American 1     | Brazil, TGP-PUR                                                                                                                                       |
+| 603        | Latin American 2     | Argentina, Bolivia, Chile, Colombia, Ecuador, Mexico, Peru, Venezuela, TGP-CLM, TGP-MXL                                                               |
 | 604        | Native American      | HGDP-Colombian, HGDP-Karitiana, HGDP-Maya, HGDP-Pima, HGDP-Surui, TGP-PEL                                                                             |
 | 700        | Oceania              | HGDP-Bougainville, HGDP-Papuan Highlands                                                                                                              |
 | 800        | Multiple Races       |                                                                                                                                                       |
