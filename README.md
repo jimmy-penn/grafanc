@@ -8,6 +8,7 @@ GrafAnc is a software tool that infers genetic ancestry at both continental and 
 
 Developer: [Yumi (Jimmy) Jin, PhD](mailto:Jimmy.Jin@Pennmedicine.upenn.edu)
 
+
 ### Required libraries and files
 
 GrafAnc requires that htslib be installed on the system. Please refer to the [htslib documentation](https://www.htslib.org) for details.
