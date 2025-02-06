@@ -52,7 +52,6 @@ In case the executable cannot be built from the source code, a prebuilt binary c
 
 ### Run medium tests
 
-
 Test scripts and test cases are placed under medium_testing directory. Test cases are saved in `test_manifest.txt`. Perl script `test_grafanc.pl` is used for manually running these test cases. 
 1. Make sure environment variable `PATH` includes current directory `.`. 
 1. If necessary, set environment variable `GARFPATH` to include the directory where GrafAnc binary and Perl scripts are located. 
