@@ -48,7 +48,7 @@ $ make HTSLIB="/applications/htslib/1.20"
 
 Or alternatively, users can set `HTSLIB` in `Makefile` to the correct htslib directory and execute `make`.
 
-In case the executable cannot be built from the source code, a prebuilt binary can be find under directory `grafanc/cpp/`.
+In case the executable cannot be built from the source code, a prebuilt binary can be find under directory `grafanc/bin/`.
 
 ### Run medium tests
 
