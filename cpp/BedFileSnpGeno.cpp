@@ -122,7 +122,7 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     // Check if not all samples are to be analyzed
     bool notAllSmps = numSamples < numFamSamples ? true : false;
     
-    long expFileLen = snpTotBytes * numBimSnps + 3;
+    long expFileLen = (long)snpTotBytes * numBimSnps + 3;
 
     bedFilePtr.seekg (0, bedFilePtr.end);
     long fileLen = bedFilePtr.tellg();
@@ -179,11 +179,12 @@ bool BedFileSnpGeno::ReadGenotypesFromBedFile()
     cout << "Bim file has " << numBimSnps << " SNPs. " << bimAncSnpNo << " SNPs are GrafAnc ancestry SNPs.\n";
     cout << "Read genotypes of " << numSamples << " samples from bed file.\n";
     cout << "\n";
+    
     if (fileLen != expFileLen) {
         cout << "\n**************************************** WARNING ****************************************\n";
         cout << "Bed file has " << fileLen << " bytes, but is expected to have " << expFileLen << " bytes based on fam and bim files.\n";
         cout << "Please check the PLINK set to make sure nothing is wrong.\n";
-        cout << "*****************************************************************************************\n";
+        cout << "*****************************************************************************************\n\n";
     }
     
     return 0;

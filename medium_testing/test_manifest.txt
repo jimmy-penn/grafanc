@@ -49,6 +49,18 @@ GrafAnc with TGP PLINK without fam | grafanc | TGP_10_1K_nofam.bed | | | TGP_10_
 # grafanc with TGP PLINK set without bim file
 GrafAnc with TGP PLINK without bim | grafanc | TGP_10_1K_nobim.bed | | | TGP_10_1K_nobim_pops.txt | | ERROR: didn't find
 
+# grafanc with TGP PLINK set with extra SNPs in bim file
+GrafAnc with TGP PLINK with longer bim | grafanc | TGP_10_1K_longbim.bed | | | TGP_10_1K_longbim_pops.txt | Y | Please check the PLINK
+
+# grafanc with TGP PLINK set with fewer SNPs in bim file
+GrafAnc with TGP PLINK with shorter bim | grafanc | TGP_10_1K_shortbim.bed | | | TGP_10_1K_shortbim_pops.txt | Y | Please check the PLINK
+
+# grafanc with TGP PLINK set with extra samples in fam file
+GrafAnc with TGP PLINK with longer fam | grafanc | TGP_10_1K_longfam.bed | | | TGP_10_1K_longfam_pops.txt | Y | Please check the PLINK
+
+# grafanc with TGP PLINK set with fewer samples in fam file
+GrafAnc with TGP PLINK with shorter fam | grafanc | TGP_10_1K_shortfam.bed | | | TGP_10_1K_shortfam_pops.txt | Y | Please check the PLINK
+
 # grafanc with TGP PLINK call without extention
 GrafAnc with TGP PLINK no ext | grafanc | TGP_40_50K_rs | | --threads 4 | TGP_40_50K_noext_pops.txt | Y | Saved population results
 
