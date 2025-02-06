@@ -50,7 +50,7 @@ Or alternatively, users can set `HTSLIB` in `Makefile` to the correct htslib dir
 
 In case the executable cannot be built from the source code, a prebuilt binary can be find under directory `grafanc/bin/`.
 
-### Run medium tests
+### Running medium tests
 
 Test scripts and test cases are placed under medium_testing directory. Test cases are saved in `test_manifest.txt`. Perl script `test_grafanc.pl` is used for manually running these test cases. 
 1. Make sure environment variable `PATH` includes current directory `.`. 
