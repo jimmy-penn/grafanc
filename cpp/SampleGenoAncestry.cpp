@@ -516,10 +516,10 @@ void GenoSample::SetGrafAncGroups()
         }
         else if (ea4 > -0.7 && ea4 < -0.2 && ea1 < -0.3) {
             if (ea4 < -0.48) {
-                ancId = 505; // Northern China 1 (Daur, Xibo, Hezhe) 
+                ancId = 506; // Northern China 2 (Daur, Xibo, Hezhe) 
             }
             else {
-                ancId = 507; // Southern China 1 (Naxi, Tu, Yi)
+                ancId = 508; // Southern China 2 (Naxi, Tu, Yi)
             }
         }
         else if (ea2 > -0.3 && ea1 < -0.3) {
@@ -529,10 +529,10 @@ void GenoSample::SetGrafAncGroups()
             ancId = 504; // Northern Asian
         }
         else if (ea1 < -0.6) {
-            ancId = 506; // Northern China 2
+            ancId = 505; // Northern China 1
         }
         else if (ea1 < -0.1) {
-            ancId = 508; // Southern China 2
+            ancId = 507; // Southern China 1
         }
         else if (ea1 < 0.5) {
             ancId = 509; // Southeast Asian
