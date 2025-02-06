@@ -158,12 +158,13 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 502        | Japan Main Islands   | HGDP-Japanese, Japan, TGP-JPT                                                                                                                         |
 | 503        | Korea                | South Korea, North Korea                                                                                                                              |
 | 504        | Northern Asia        | Kyrgyzstan, Mongolia, Nepal, HGDP-Hazara, HGDP-Uygur, HGDP-Yakut                                                                                      |
-| 505        | Northern China 1     | HGDP-Daur, HGDP-Hezhen, HGDP-Mongolian, HGDP-Naxi, HGDP-Oroqen, HGDP-Tu, HGDP-Xibo, HGDP-Yi                                                           |
+| 505        | Northern China 1     | HGDP-Daur, HGDP-Hezhen, HGDP-Mongolian, HGDP-Oroqen, HGDP-Xibo                                                                      |
 | 506        | Northern China 2     | China, HGDP-Northern Han, TGP-CHB                                                                                                                     |
-| 507        | Southern China       | Brunei, Hong Kong, Indonesia, Malaysia, Singapore, Taiwan, HGDP-Han, HGDP-Miao, HGDP-She, HGDP-Tujia, TGP-CHS                                         |
-| 508        | Southeast Asia       | Cambodia, Philippines, Vietnam , HGDP-Dai, HGDP-Lahu, TGP-CDX, TGP-KHV                                                                                |
-| 509        | Thailand             | Laos, Thailand, HGDP-Cambodian                                                                                                                        |
-| 510        | Other East Asia      |                                                                                                                                                       |
+| 507        | Southern China 1     | HGDP-Naxi, HGDP-Tu, HGDP-Yi                                                                                                                           |
+| 508        | Southern China 2     | Brunei, Hong Kong, Indonesia, Malaysia, Singapore, Taiwan, HGDP-Han, HGDP-Miao, HGDP-She, HGDP-Tujia, TGP-CHS                                         |
+| 509        | Southeast Asia       | Cambodia, Philippines, Vietnam , HGDP-Dai, HGDP-Lahu, TGP-CDX, TGP-KHV                                                                                |
+| 510        | Thailand             | Laos, Thailand, HGDP-Cambodian                                                                                                                        |
+| 511        | Other East Asia      |                                                                                                                                                       |
 | 601        | African American     | Antigua, Aruba, Barbados, Caribbean, Guianas, West Indies, TGP-ACB, TGP-ASW                                                                           |
 | 602        | Latin American 1     | Brazil, TGP-PUR                                                                                                                                       |
 | 603        | Latin American 2     | Argentina, Bolivia, Chile, Colombia, Ecuador, Mexico, Peru, Venezuela, TGP-CLM, TGP-MXL                                                               |
@@ -175,7 +176,7 @@ The ancestry group assignment was made based on the reference data from UKBB, 1K
 
 ### Estimating reliabilities of GrafAnc results
 
-When assigning ancestry groups, GrafAnc assumes there are enough (see above) ancestry SNPs with non-missing genotypes in the input data set. When there are fewer SNPs with genotypes, the ancestry group assignments are less reliable. In order to estimate the variance of the GrafAnc scores when difference number of genotyped ancestry SNPs are available, we tested GrafAnc using 1KGP data and randomly setting some genotypes as missing. As expected, the standard deviations of a GrafAnc scores are directly proportional to the inverse of numbers of SNPs with non-missing genotypes. We have done linear regression analysis and obtained the parameters for all GrafAnc scores:
+When assigning ancestry groups, GrafAnc assumes there are enough (see above) ancestry SNPs with non-missing genotypes in the input data set. When there are fewer SNPs with genotypes, the ancestry group assignments are less reliable. In order to estimate the variance of the GrafAnc scores when difference number of genotyped ancestry SNPs are available, we tested GrafAnc using 1KGP data and randomly setting some genotypes as missing. As expected, the standard deviations of a GrafAnc scores are directly proportional to the inverse of square root of numbers of SNPs with non-missing genotypes. We have done linear regression analysis and obtained the parameters for all GrafAnc scores:
 
 | Score | *a*     | *b*   |
 |-------|---------|-------|

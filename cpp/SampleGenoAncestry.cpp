@@ -140,7 +140,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             GenoSample smp = samples[i];
             if (!smp.ancIsSet) continue;
 
-            sprintf(line, "%s\t%5.4f", smp.name.c_str(), smp.numAncSnps);
+            sprintf(line, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
             sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
@@ -515,28 +515,33 @@ void GenoSample::SetGrafAncGroups()
             ancId = 502; // Japan
         }
         else if (ea4 > -0.7 && ea4 < -0.2 && ea1 < -0.3) {
-            ancId = 504; // Includes Northern China Minorities
+            if (ea4 < -0.48) {
+                ancId = 505; // Northern China 1 (Daur, Xibo, Hezhe) 
+            }
+            else {
+                ancId = 507; // Southern China 1 (Naxi, Tu, Yi)
+            }
         }
         else if (ea2 > -0.3 && ea1 < -0.3) {
             ancId = 503; // Korea
         }
         else if (ea4 > -0.2 && ea4 > ea1 + 0.1) {
-            ancId = 505; // Northern Asian
+            ancId = 504; // Northern Asian
         }
         else if (ea1 < -0.6) {
-            ancId = 506; // Northern China
+            ancId = 506; // Northern China 2
         }
         else if (ea1 < -0.1) {
-            ancId = 507; // Southern China
+            ancId = 508; // Southern China 2
         }
         else if (ea1 < 0.5) {
-            ancId = 508; // Southeast Asian
+            ancId = 509; // Southeast Asian
         }
         else if (ea2 > -1) {
-            ancId = 509; // Thailand
+            ancId = 510; // Thailand
         }
         else {
-            ancId = 510; // Other East Asia
+            ancId = 511; // Other East Asia
         }
     }
     else if (eu1 < 1.6 && ic2 < -0.25) {
