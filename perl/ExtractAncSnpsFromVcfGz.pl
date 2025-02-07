@@ -104,11 +104,10 @@ else {
 my $numVcfFiles = keys %allVcfFiles;
 print "Found $numVcfFiles vcf files with key word '$keyWord' before an integer.\n\n" if ($keyWord);
 
-my $ancSnpFile = "AncInferSNPs.txt";
-$ancSnpFile = "$pathToScript/data/$ancSnpFile";
+my $dataDir = $pathToScript;
+$dataDir =~ s/perl/cpp\/data/;
 
-#### TODO: move AncSnpFile to right place
-$ancSnpFile = "/home/jinjim/grafsrc/grafanc/cpp/data/AncSnpPopAFs.txt";
+my $ancSnpFile = "$dataDir/AncSnpPopAFs.txt";
 
 unless (-e $ancSnpFile) {
     print "\nERROR: didn't find $ancSnpFile\n";
