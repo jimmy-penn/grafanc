@@ -200,7 +200,7 @@ int AncestrySnps::ReadRefSubPopSnpsFromFile(string refPopFile)
     int rsCol = 3;
     
     int numExpCols = 7;
-    string expCols[numExpCols] = {"chr", "pos_37", "pos_38", "rs", "ref", "alt", "UKBBEUR"};
+    string expCols[7] = {"chr", "pos_37", "pos_38", "rs", "ref", "alt", "UKBBEUR"};
     
     // Make sure the file has correct columns
     bool isRightFile = true;
