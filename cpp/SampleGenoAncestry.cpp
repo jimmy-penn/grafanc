@@ -128,10 +128,10 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
         if (!isAppend) {
             sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
             for (int i = 0; i < numSubPopScores; i++) {
-                sprintf(line, "%s\t%s", line, popScoreNames[i].c_str());
+                strcat(line, "\t");
+                strcat(line, popScoreNames[i].c_str());
             }
-            sprintf(line, "%s\tPe\tPf\tPa\tRawPe\tRawPf\tRawPa", line);
-            sprintf(line, "%s\tAncGroupID", line);
+            strcat(line, "\tPe\tPf\tPa\tRawPe\tRawPf\tRawPa\tAncGroupID");
 
             fprintf(ifp, "%s\n", line);
         }
@@ -141,6 +141,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             if (!smp.ancIsSet) continue;
 
             sprintf(line, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
+            
             sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
             for (int i = 0; i < numSubPopScores; i++) {
                 sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);

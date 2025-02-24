@@ -312,6 +312,9 @@ string FindFile(string filename)
     fullFile = exeDir + "/../cpp/data/" + filename;
     if (FileExists(fullFile.c_str())) return fullFile;
     
+    fullFile = exeDir + "/cpp/data/" + filename;
+    if (FileExists(fullFile.c_str())) return fullFile;
+    
     if (const char* grafPath = getenv("GRAFPATH")) {
         string grafDir = string(grafPath);
       
