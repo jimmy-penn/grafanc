@@ -9,14 +9,14 @@
 //  Department of Pathology and Laboratory Medicine, Perelman School of Medicine, 
 //  University of Pennsylvania, Philadelphia, Pennsylvania, USA 
 //
-//  02/06/2025
+//  03/03/2025
 // ==========================================================================================
 
 SampleGenoAncestry *smpGenoAnc = NULL;
 
 int main(int argc, char* argv[])
 {
-    string usage = "GrafAnc 0.1.0 (02/06/2025)    https://github.com/jimmy-penn/grafanc\n"
+    string usage = "GrafAnc 0.2.0 (03/03/2025)    https://github.com/jimmy-penn/grafanc\n"
         "Yumi (Jimmy) Jin, PhD (Jimmy.Jin@Pennmedicine.upenn.edu)\n\n"
         "Usage: grafanc <Binary PLINK set or VCF file> <output file> [Options]\n"
         "\t--maxmem  <size in MB>:  specify maximum memory in MB to be used by GrafAnc. Default 8 MB\n"

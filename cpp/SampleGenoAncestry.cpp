@@ -584,10 +584,10 @@ void GenoSample::SetGrafAncGroups()
             // MENA
           
             if (ic3 > 0.3) {
-                ancId = 204; // West Asia
+                ancId = 203; // West Asia
             }
             else {
-                ancId = 203; // Middle East
+                ancId = 202; // Middle East
             }
         }
     }
@@ -596,11 +596,11 @@ void GenoSample::SetGrafAncGroups()
             ancId = 201; // North Africa
         }
         else {
-            ancId = 203; // Middle East
+            ancId = 202; // Middle East
         }
     }
     else if (eu1 > 2.2 && ic2 < 1.4) {
-          ancId = 202; // Northeast Africa
+          ancId = 106; // Northeast Africa
     }
     else if (gd1  > 1.4758) {
         // Latin American 1
@@ -614,7 +614,7 @@ void GenoSample::SetGrafAncGroups()
             }
         }
         else {
-            ancId = 800; // Multiple ancestry
+            ancId = 308; // Other Europe
         }
     }
     else {
@@ -628,7 +628,7 @@ void GenoSample::SetGrafAncGroups()
             
             if (af3 < af1 * 4.0 / 3 + 0.4) {
                 if (af3 > 0.5) {
-                    ancId = 106; // Other Africa
+                    ancId = 107; // Other Africa
                 }
                 else {
                     if (af1 > 0.6) {
@@ -650,7 +650,7 @@ void GenoSample::SetGrafAncGroups()
                 }
                 else {
                     if (af3 > 0.5) {
-                        ancId = 106; // Other Africa
+                        ancId = 107; // Other Africa
                     }
                     else if (af2 < -0.1) {
                         ancId = 101; // Nigeria

@@ -136,11 +136,11 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 103        | Central Africa      | Angola, Burundi, Cameroon, Congo, Malawi, Rwanda, Tanzania, Uganda, Zambia                                                                            |
 | 104        | Kenya               | Kenya, HGDP-Bantu Kenya, HGDP-Biaka, TGP-LWK                                                                                                          |
 | 105        | Southern Africa     | Botswana, South Africa, Zimbabwe, HGDP-Bantu South Africa, HGDP-Mbuti                                                                                 |
-| 106        | Other Africa        | Mozambique                                                                                                                                            |
+| 106        | Northeastern Africa | Eritrea, Ethiopia, Somalia, Sudan                                                                                                                     |
+| 107        | Other Africa        | Mozambique                                                                                                                                            |
 | 201        | Northern Africa     | Algeria, Libya, Morocco, Tunisia, HGDP-Mozabite                                                                                                       |
-| 202        | Northeastern Africa | Eritrea, Ethiopia, Somalia, Sudan                                                                                                                     |
-| 203        | Middle East 1       | Cyprus, Egypt, Israel, Jordan, Kuwait, Lebanon, Palestine, Syria, Yemen, HGDP-Bedouin, HGDP-Druze, HGDP-Palestinian                                   |
-| 204        | Middle East 2       | Armenia, Azerbaijan, Iran, Iraq, Turkey                                                                                                               |
+| 202        | Middle East 1       | Cyprus, Egypt, Israel, Jordan, Kuwait, Lebanon, Palestine, Syria, Yemen, HGDP-Bedouin, HGDP-Druze, HGDP-Palestinian                                   |
+| 203        | Middle East 2       | Armenia, Azerbaijan, Iran, Iraq, Turkey                                                                                                               |
 | 301        | Finland             | Finland, TGP-FIN                                                                                                                                      |
 | 302        | Northern Europe     | Denmark, Iceland, Norway, Sweden                                                                                                                      |
 | 303        | Western Europe      | Austria, Belgium, British, France, Germany, Irish, Luxembourg, Netherlands, Switzerland, United Kingdom, HGDP-French, HGDP-Orcadian, TGP-CEU, TGP-GBR |
