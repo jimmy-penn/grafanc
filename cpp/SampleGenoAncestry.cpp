@@ -584,10 +584,10 @@ void GenoSample::SetGrafAncGroups()
             // MENA
           
             if (ic3 > 0.3) {
-                ancId = 203; // West Asia
+                ancId = 203; // Middle East 1
             }
             else {
-                ancId = 202; // Middle East
+                ancId = 202; // Middle East 2
             }
         }
     }
@@ -596,7 +596,7 @@ void GenoSample::SetGrafAncGroups()
             ancId = 201; // North Africa
         }
         else {
-            ancId = 202; // Middle East
+            ancId = 202; // Middle East 2
         }
     }
     else if (eu1 > 2.2 && ic2 < 1.4) {
@@ -607,10 +607,10 @@ void GenoSample::SetGrafAncGroups()
         
         if (ic1 < -0.2) {
             if (gd3 > 0.05) {
-                ancId = 604; // Native American
+                ancId = 603; // Native American
             }
             else {
-                ancId = 603; // Other Latin American
+                ancId = 602; // Other Latin American
             }
         }
         else {
@@ -621,14 +621,14 @@ void GenoSample::SetGrafAncGroups()
         // Black backgound
         
         if (ic1 < 0.9 * gd1 - 1.36) {
-            ancId = 602; // Latin American 1
+            ancId = 601; // Latin American 1
         }
         else {
             // West Africa
             
             if (af3 < af1 * 4.0 / 3 + 0.4) {
                 if (af3 > 0.5) {
-                    ancId = 107; // Other Africa
+                    ancId = 108; // Other Africa
                 }
                 else {
                     if (af1 > 0.6) {
@@ -646,11 +646,11 @@ void GenoSample::SetGrafAncGroups()
             }
             else {
                 if (af1 > -0.8 && af2 > -0.6 && af2 < 0.9 * af1 + 0.8) {
-                    ancId = 601; // African American
+                    ancId = 107; // African American
                 }
                 else {
                     if (af3 > 0.5) {
-                        ancId = 107; // Other Africa
+                        ancId = 108; // Other Africa
                     }
                     else if (af2 < -0.1) {
                         ancId = 101; // Nigeria

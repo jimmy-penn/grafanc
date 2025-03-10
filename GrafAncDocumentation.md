@@ -123,7 +123,7 @@ GrafAnc assigns ancestry groups at two levels, similar to the self-reported popu
 | 300        | EUR           | European                     |
 | 400        | SAS           | South Asian                  |
 | 500        | EAS           | East Asian                   |
-| 600        | AMR           | Admixed American             |
+| 600        | AMR           | American                     |
 | 700        | OCN           | Oceania                      |
 | 800        | MIX           | Multi-ancestry               |
 
@@ -137,7 +137,8 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 104        | Kenya               | Kenya, HGDP-Bantu Kenya, HGDP-Biaka, TGP-LWK                                                                                                          |
 | 105        | Southern Africa     | Botswana, South Africa, Zimbabwe, HGDP-Bantu South Africa, HGDP-Mbuti                                                                                 |
 | 106        | Northeastern Africa | Eritrea, Ethiopia, Somalia, Sudan                                                                                                                     |
-| 107        | Other Africa        | Mozambique                                                                                                                                            |
+| 107        | African American    | Antigua, Aruba, Barbados, Caribbean, Guianas, West Indies, TGP-ACB, TGP-ASW                                                                           |
+| 108        | Other Africa        | Mozambique                                                                                                                                            |
 | 201        | Northern Africa     | Algeria, Libya, Morocco, Tunisia, HGDP-Mozabite                                                                                                       |
 | 202        | Middle East 1       | Cyprus, Egypt, Israel, Jordan, Kuwait, Lebanon, Palestine, Syria, Yemen, HGDP-Bedouin, HGDP-Druze, HGDP-Palestinian                                   |
 | 203        | Middle East 2       | Armenia, Azerbaijan, Iran, Iraq, Turkey                                                                                                               |
@@ -165,10 +166,9 @@ The other two digits in `AncGroupID` code for sub-continental ancestry groups. T
 | 509        | Southeast Asia      | Cambodia, Philippines, Vietnam , HGDP-Dai, HGDP-Lahu, TGP-CDX, TGP-KHV                                                                                |
 | 510        | Thailand            | Laos, Thailand, HGDP-Cambodian                                                                                                                        |
 | 511        | Other East Asia     |                                                                                                                                                       |
-| 601        | African American    | Antigua, Aruba, Barbados, Caribbean, Guianas, West Indies, TGP-ACB, TGP-ASW                                                                           |
-| 602        | Latin American 1    | Brazil, TGP-PUR                                                                                                                                       |
-| 603        | Latin American 2    | Argentina, Bolivia, Chile, Colombia, Ecuador, Mexico, Peru, Venezuela, TGP-CLM, TGP-MXL                                                               |
-| 604        | Native American     | HGDP-Colombian, HGDP-Karitiana, HGDP-Maya, HGDP-Pima, HGDP-Surui, TGP-PEL                                                                             |
+| 601        | Latin American 1    | Brazil, TGP-PUR                                                                                                                                       |
+| 602        | Latin American 2    | Argentina, Bolivia, Chile, Colombia, Ecuador, Mexico, Peru, Venezuela, TGP-CLM, TGP-MXL                                                               |
+| 603        | Native American     | HGDP-Colombian, HGDP-Karitiana, HGDP-Maya, HGDP-Pima, HGDP-Surui, TGP-PEL                                                                             |
 | 700        | Oceania             | HGDP-Bougainville, HGDP-Papuan Highlands                                                                                                              |
 | 800        | Multiracial         |                                                                                                                                                       |
 
