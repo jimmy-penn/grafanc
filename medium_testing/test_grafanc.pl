@@ -62,12 +62,11 @@ for my $testNo (0 .. $#allTests) {
     my $expOutFile = $test{fileExpected};
     my $expMsg = $test{stdoutMsg};
 
-
-    #### TODO: mv grafanc to the right place
     $testCmd =~ s/^grafanc/\.\.\/cpp\/grafanc/;
     $testCmd =~ s/^ExtractAncSnpsFromVcfGz/\.\.\/perl\/ExtractAncSnpsFromVcfGz/;
+    $testCmd =~ s/^PlotGrafAnc/\.\.\/python\/PlotGrafAnc/;
 
-    my $testId = $testNo+ 1;
+    my $testId = $testNo + 1;
 
     print "Running Test No. $testId: $testName\n\tCommand: $testCmd\n";
 
@@ -108,7 +107,6 @@ sub RunTest
 
     my @testT1 = gettimeofday;
     my $fullCmd = "$cmd";
-    $fullCmd =~ s/\-spf\s+(\S+)/\-spf $inputDir\/$1/;
 
     my $fullTestOutFile = "$testOutDir/$testOutFile";
     my $fullBaselineFile = "$baselineDir/$testOutFile";
@@ -201,9 +199,19 @@ sub GetAllTestCommands
       	die "\nERROR: didn't find input file in No. $cmdNo: $testName\n" unless ($inputFile);
 	      die "\nERROR: didn't find output file in No. $cmdNo: $testName\n" unless ($outputFile);
 
-      	$cmd .= " $inputDir/$inputFile";
-      	$cmd .= " $outputDir/$outputFile";
-      	$cmd .= " -spf $raceFile" if ($raceFile);
+        my ($score1, $score2) = ("", "");
+        if ($cmd =~ /PlotGrafAnc/) {
+            ($testName, $cmd, $inputFile, $raceFile, $options, $outputFile, $score1, $score2, $expFile, $expMsg) = split /\s*\|\s*/, $line;
+          	$cmd .= " $outputDir/$inputFile";
+          	$cmd .= " $outputDir/$outputFile";
+          	$cmd .= " $score1";
+          	$cmd .= " $score2";
+          	$cmd .= " --sbj_pop_file $inputDir/$raceFile" if ($raceFile);
+        }
+        else {
+          	$cmd .= " $inputDir/$inputFile";
+          	$cmd .= " $outputDir/$outputFile";
+        }
       	$cmd .= " $options" if ($options);
 
       	my %test = (name => $testName,
@@ -212,6 +220,8 @@ sub GetAllTestCommands
       		    raceFile => $raceFile,
       		    options => $options,
       		    outputFile => $outputFile,
+      		    score1 => $score1,
+      		    score2 => $score2,
       		    fileExpected => $expFile,
       		    stdoutMsg => $expMsg);
       	push @allTests, \%test;
