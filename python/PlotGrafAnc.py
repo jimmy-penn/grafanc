@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# Standard modules
 import argparse
 
 import os
@@ -47,6 +46,7 @@ def ShowLegends(ax, graph_params, sbj_pop_obj):
         lbl = sbj_pop_obj.lgd_pops[i]
         if lbl == "":
             lbl = "NO VALUE"
+            
         y = lgd_y_val - lgd_y_gap * row
         color = sbj_pop_obj.lgd_colors[i]
         try:
@@ -63,6 +63,10 @@ def ShowLegends(ax, graph_params, sbj_pop_obj):
         row = row + 1
 
 def PlotGrafAnc(args):
+    """
+    Plot the scatterplot
+    """
+    
     in_file = args.input_file
     out_file = args.output_file
 
@@ -100,12 +104,12 @@ def PlotGrafAnc(args):
     
     sbjs = []
     
-    # Selected populations to be plotted to the front
+    # Selected populations are plotted to the front
     xvals = []
     yvals = []
     colors = []
 
-    # Other populations to be plotted to the background using background color
+    # Other populations are plotted to the background using background color
     xvals0 = []
     yvals0 = []
     colors0 = []
@@ -147,15 +151,21 @@ def PlotGrafAnc(args):
                 xvals.append(x)
                 yvals.append(y)
 
-    # Plot the EAF triangle for GD1 vs. GD2
-    if xcol == "GD1" and ycol == "GD2":
-        if not args.hide_EAF:
-            e_x, e_y = graph_params.e_x, graph_params.e_y
-            f_x, f_y = graph_params.f_x, graph_params.f_y
-            a_x, a_y = graph_params.a_x, graph_params.a_y
-            triColor = "gray"
-
-            ax.plot([e_x, a_x, f_x, e_x],[e_y, a_y, f_y, e_y], linewidth=0.8, color=f'{triColor}')
+    # Plot the AF line for GD1 vs. GD3
+    if not args.hide_EAF:
+        e_x, e_y = graph_params.e_x, graph_params.e_y
+        f_x, f_y = graph_params.f_x, graph_params.f_y
+        a_x, a_y = graph_params.a_x, graph_params.a_y
+        line_color = "gray"
+        line_width = 0.8
+        
+        # Plot the EAF triangle for GD1 vs. GD2
+        if xcol == "GD1" and ycol == "GD2":
+            ax.plot([e_x, a_x, f_x, e_x],[e_y, a_y, f_y, e_y], linewidth=line_width, color=line_color)
+                
+        # Plot the AF line for GD1 vs. GD3
+        if xcol == "GD1" and ycol == "GD3":
+            ax.plot([a_x, f_x],[0, 0], linewidth=0.8, color=line_color)
 
     ShowLegends(ax, graph_params, sbj_pop_obj)
 
@@ -220,10 +230,6 @@ def main():
     parser.add_argument("--nolimits", help="Let python select axis limits", action="store_true")
 
     args = parser.parse_args()
-    if len(sys.argv) < 3:
-        print("\nERROR: At least two arguments are required.")
-        print("Please run 'PlotGrafAnc.py --help' to see the instruction.\n")
-        exit()
 
     if not os.path.isfile(args.input_file):
         print(f"\nERROR: didn't find file {args.input_file}\n")

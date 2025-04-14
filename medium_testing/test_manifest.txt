@@ -134,16 +134,16 @@ Plot EA1-EA2 race colors | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjP
 Plot EA1-EA2 race colors adj params | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --dot_size 10 --lgd_x 0.7 --xmax 3.5 --ymin -3  | TGP_40_50K_EA12_lgd.png | EA1 | EA2 | Y | Saved scatterplot
 
 # Plot EA1 EA2 coloring selected races
-Plot EA1-EA2 coloring selected races | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --dot_size 10 --lgd_x 0.7 --xmax 3.5 --ymin -3 --pops 3,6,9,22,24  | TGP_40_50K_EA12_pop.png | EA1 | EA2 | Y | Saved scatterplot
+Plot EA1-EA2 coloring selected races | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --dot_size 10 --lgd_x 0.8 --lgd_y 0.1 --xmax 3.5 --ymin -3 --pops 3,6,9,22,24  | TGP_40_50K_EA12_pop.png | EA1 | EA2 | Y | Saved scatterplot
 
 # Plot EA1 EA2 showing only EAS and SAS
-Plot EA1-EA2 showing only EAS and SAS | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --dot_size 10 --lgd_x 0.7 --xmax 3.5 --ymin -3 --show_ancs 500,600  | TGP_40_50K_EA12_anc.png | EA1 | EA2 | Y | Saved scatterplot
+Plot EA1-EA2 showing only EAS and SAS | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --dot_size 10 --lgd_x 0.8 --xmax 3.5 --ymin -3 --show_ancs 500,600  | TGP_40_50K_EA12_anc.png | EA1 | EA2 | Y | Saved scatterplot
 
 # Plot EU1 EU2 testing other parameters
-Plot EU1 EU2 testing other parameters | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --nolimits --tight_plot --gw 6 --gh 5 --dot_size 20 | TGP_40_50K_EU12_param.png | EA1 | EA2 | Y | Saved scatterplot
+Plot EU1 EU2 testing other parameters | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_SbjPop.txt | --nolimits --tight_plot --gw 6 --gh 5 --dot_size 20 --title "Scatterplot of EU1 vs. EU2" | TGP_40_50K_EU12_param.png | EU1 | EU2 | Y | Saved scatterplot
 
 # Plot EU1 EU2 with race file with header 
-Plot EU1 EU2 race file with header | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_RaceSbj.txt | --sbj_col Sample --pop_col Race  --dot_size 20 | TGP_40_50K_EU12_header.png | EA1 | EA2 | Y | Saved scatterplot
+Plot EU1 EU2 race file with header | PlotGrafAnc.py |  TGP_40_50K_gb38_pops.txt | TGP_RaceSbj.txt | --sbj_col Sample --pop_col Race  --dot_size 20 | TGP_40_50K_EU12_header.png | EU1 | EU2 | Y | Saved scatterplot
 
 
 ############### The following test cases test Perl script ExtractAncSnpsFromVcfGz.pl

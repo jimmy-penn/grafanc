@@ -1,6 +1,6 @@
 class GraphParameter:
     """
-    Set parameters for plot
+    Set parameters for the scatterplot
     
     """
 
@@ -18,7 +18,7 @@ class GraphParameter:
 
         self.lgd_x_pos = 0.02     # legend x position (0 = left, 0.5 = middle)
         self.lgd_y_pos = 0.03     # legend y position (0 = top, 0.5 = middle)
-        self.lgd_size = 1.0       # legend size (size = default x this number)
+        self.lgd_size = 1.0       # legend size 
         self.lgd_font_size = 8    # legend font size
         self.lgd_x_gap = 1.5      # space between legend and label
         self.lgd_y_gap = 1.5      # space between two legend rows
@@ -43,7 +43,7 @@ class GraphParameter:
         if args.lgd_x:
             self.lgd_x_pos = float(args.lgd_x)
         if args.lgd_y:
-            self.lgd_x_pos = float(args.lgd_y)
+            self.lgd_y_pos = float(args.lgd_y)
 
         ranges = self.GetDefaultAxisRanges()
         
@@ -83,7 +83,7 @@ class GraphParameter:
         
         axis_range['GD1'] = [ 1.0, 1.8]
         axis_range['GD2'] = [ 1.0, 1.8]
-        axis_range['GD3'] = [-1.0, 0.3]
+        axis_range['GD3'] = [-0.2, 0.6]
         axis_range['AF1'] = [-1.5, 2.5]
         axis_range['AF2'] = [-1.5, 2.5]
         axis_range['AF3'] = [-1.0, 3.5]
@@ -135,10 +135,10 @@ class GraphParameter:
             
         return error
 
-#
-# Given v1, v2, bound them to [minv, maxv], and set v2 - v1 to a min_range 
-#
 def BoundValuesToRange(v1, v2, minv, maxv, min_range):
+    """
+     Given v1, v2, bound them to [minv, maxv], and set v2 - v1 to a min_range 
+    """
     newv1 = v1 if v1 > minv else minv
     newv2 = v2 if v2 > minv else minv
 
