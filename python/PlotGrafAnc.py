@@ -20,6 +20,7 @@ from matplotlib import ticker
 from PopColors import PopColor
 from GraphParameters import GraphParameter
 from SubjectPops import SubjectPops
+from matplotlib.patches import Ellipse
 
 def ShowLegends(ax, graph_params, sbj_pop_obj):
     """
@@ -48,9 +49,12 @@ def ShowLegends(ax, graph_params, sbj_pop_obj):
             lbl = "NO VALUE"
             
         y = lgd_y_val - lgd_y_gap * row
+        cx, cy = x + lgd_width/2, y + lgd_height/2
+        radius = lgd_width/2
+            
         color = sbj_pop_obj.lgd_colors[i]
         try:
-            rect = patches.Rectangle((x, y), lgd_width, lgd_height, facecolor=color, edgecolor=color)
+            ellipse = Ellipse(xy=(cx, cy), width=lgd_width, height=lgd_height, angle=0, facecolor=color, edgecolor=color)
         except ValueError as error:
             print(f'\nValueError: cannot plot legend for {lbl}: {error}\n')
             exit()
@@ -58,7 +62,7 @@ def ShowLegends(ax, graph_params, sbj_pop_obj):
             print(f'\nError: cannot plot legend for {lbl}: {error}\n')
             exit()
             
-        ax.add_patch(rect)
+        ax.add_patch(ellipse)
         ax.text(x+lgd_x_gap, y, lbl, fontsize=graph_params.lgd_font_size)
         row = row + 1
 
@@ -97,7 +101,7 @@ def PlotGrafAnc(args):
     try:
         pf = pd.read_csv(in_file, sep="\t")
     except Exception as error:
-        print(f'\nERROR: Cannot open {self.sbj_anc_file}: {error}\n')
+        print(f'\nERROR: Cannot open {in_file}: {error}\n')
         exit()
         
     num_file_sbjs = len(pf[sbj_pop_obj.ga_sbj_col]) # not all will be read
