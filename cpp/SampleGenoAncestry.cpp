@@ -126,7 +126,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     if(ifp) {
         char line[512];
         if (!isAppend) {
-            sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "#SNPs");
+            sprintf(line, "%s\t%s\tGD1\tGD2\tGD3", "Sample", "SNPs");
             for (int i = 0; i < numSubPopScores; i++) {
                 strcat(line, "\t");
                 strcat(line, popScoreNames[i].c_str());
