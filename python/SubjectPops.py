@@ -18,7 +18,7 @@ class SubjectPops:
         self.sbj_pop_file = args.input_file  # optional sbj race file
         self.ga_sbj_col = "Sample"           # sbj column in the GrafAnc result file
         self.ga_anc_col = "AncGroupID"       # population column in GrafAnc result file
-        self.ga_snp_col = "#SNPs"            # num SNPs column in GrafAnc result file
+        self.ga_snp_col = "SNPs"             # num SNPs column in GrafAnc result file
         self.show_ancs = []                  # Anc IDs to be included in the plot
         self.num_show_ancs = 0               # number of the above Anc IDs
         self.sbj_col = ""                    # sbj column in sbj pop file
@@ -170,7 +170,7 @@ class SubjectPops:
                     self.all_sup_anc_ids[sup_anc_id] += 1
 
         mean_snps = tot_snps * 1.0 / self.tot_sbjs
-        print(f'\t#SNPs/subject: {min_snps} - {max_snps}, mean = {mean_snps:.1f}')
+        print(f'\tSNPs/subject: {min_snps} - {max_snps}, mean = {mean_snps:.1f}')
 
         self.sbj_min_snps = min_snps
         self.sbj_max_snps = max_snps
