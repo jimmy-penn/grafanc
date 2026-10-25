@@ -4,7 +4,7 @@ GrafAnc
 
 </h1>
 
-GrafAnc is a software tool that infers genetic ancestry at both continental and subcontinental levels quickly and reliably. GrafAnc source code includes C++ programs and Perl scripts. See [GrafAnc documentation](https://github.com/jimmy-penn/grafanc/tree/master/GrafAncDocumentation.md) for software documentation. GrafAnc has been used by [PopHWE](https://github.com/jimmy-penn/PopHWE) to partition genotype datasets into ancestry groups for HWE-test. 
+GrafAnc is a software tool that infers genetic ancestry at both continental and subcontinental levels quickly and reliably. GrafAnc source code includes C++ programs and Perl scripts. See [GrafAnc documentation](https://github.com/jimmy-penn/grafanc/tree/master/GrafAncDocumentation.md) for software documentation. GrafAnc is used by [PopHWE](https://github.com/jimmy-penn/grafanc/tree/master/GrafAncDocumentation.md) to partition genotype datasets into ancestry groups for HWE-test. 
 
 Developer: [Yumi (Jimmy) Jin, PhD](mailto:yumijin@hotmail.com).
 
