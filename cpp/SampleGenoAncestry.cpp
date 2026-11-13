@@ -136,25 +136,22 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
             fprintf(ifp, "%s\n", line);
         }
 
-        for (int i = 0; i < numSaveSmps; i++) {
+        for (int i = 0; i < samples.size(); i++) {
             GenoSample smp = samples[i];
             if (!smp.ancIsSet) continue;
 
-            sprintf(line, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
-            
-            sprintf(line, "%s\t%7.6f\t%7.6f\t%7.6f", line, smp.gd1, smp.gd2, smp.gd3);
-            for (int i = 0; i < numSubPopScores; i++) {
-                sprintf(line, "%s\t%7.6f", line, smp.subPopScores[i]);
+            fprintf(ifp, "%s\t%d", smp.name.c_str(), smp.numAncSnps);
+            fprintf(ifp, "\t%7.6f\t%7.6f\t%7.6f", smp.gd1, smp.gd2, smp.gd3);
+            for (int j = 0; j < numSubPopScores; j++) {
+                fprintf(ifp, "\t%7.6f", smp.subPopScores[j]);
             }
-            sprintf(line, "%s\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%d",
-                    line, smp.ePct, smp.fPct, smp.aPct, smp.rawPe, smp.rawPf, smp.rawPa, smp.ancGroupId);
-
-            fprintf(ifp, "%s\n", line);
+            fprintf(ifp, "\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%d\n",
+                    smp.ePct, smp.fPct, smp.aPct, smp.rawPe, smp.rawPf, smp.rawPa, smp.ancGroupId);
         }
     }
     else {
         cout << "ERROR: Can't open " << outFile << " for writing!\n";
-        return 0;
+        return -1;
     }
 
     fclose(ifp);

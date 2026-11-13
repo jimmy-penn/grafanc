@@ -4,7 +4,8 @@ INCLUDES = -I. -I$(BASEDIR)
 #------ Compiler and options -----------------
 CXX = /usr/bin/g++
 HTSLIB = ~/htslib/1.20
-CXXFLAGS = -std=c++11 -pthread -g -lm -lz $(INCLUDES) -I $(HTSLIB)/include -L $(HTSLIB)/lib -lhts -lstdc++
+CXXFLAGS = -std=c++11 -pthread -g $(INCLUDES) -I $(HTSLIB)/include
+LDLIBS = -L $(HTSLIB)/lib -lhts -lz -lm
 
 HDIR = ./
 SRCDIR = ./
@@ -22,7 +23,7 @@ SRC = Util.cpp AncestrySnps.cpp VcfGrafAncSnpGeno.cpp FamFileSamples.cpp BimFile
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 grafanc: $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
 Util.o: $(HDIR)Util.h
 	$(CXX) $(CXXFLAGS) -c Util.cpp
