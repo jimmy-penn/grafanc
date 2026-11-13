@@ -151,7 +151,7 @@ int SampleGenoAncestry::SaveAncestryResults(string outFile, bool isAppend)
     }
     else {
         cout << "ERROR: Can't open " << outFile << " for writing!\n";
-        return 0;
+        return -1;
     }
 
     fclose(ifp);

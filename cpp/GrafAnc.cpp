@@ -44,21 +44,21 @@ int main(int argc, char* argv[])
 
     if (fileType == GenoDatasetType::NOT_EXISTS) {
         cout << "\nERROR: Genotype file " << genoDs << " doesn't exist!\n\n";
-    	  return 0;
+    	  return 1;
     }
     else if (fileType == GenoDatasetType::IS_PLINK_GZ) {
         cout << "\nERROR: PLINK set " << genoDs << " is zipped. Please unzip it.\n\n";
-        return 0;
+        return 1;
     }
     else if (fileType == GenoDatasetType::IS_OTHER) {
         cout << "\nERROR: Genotype file " << genoDs << " should be a binary PLINK set or vcf or vcf.gz file..\n\n";
-        return 0;
+        return 1;
     }
 
     string ancSnpFile = FindFile("AncSnpPopAFs.txt");
     if (ancSnpFile == "") {
         cout << "ERROR: didn't find file AncSnpPopAFs.txt. Please put the file under 'data' directory.\n\n";
-        return 0;
+        return 1;
     }
 
     string refSubPopFile = ancSnpFile;
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
              if (!FileExists(famFile.c_str())) cout << "\nERROR: didn't find " << famFile << "\n";
              cout << "\n";
              
-             return 0;
+             return 1;
         }
         
         famSmps = new FamFileSamples(famFile);
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 
             if (!dataRead) {
                 cout << "\nFailed to read genotype data from " << genoDs << "\n\n";
-                return 0;
+                return 1;
             }
             vcfGeno->RecodeSnpGenotypes();
             
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
             else {
                 cout << "\nWARNING: Ancestry inference not done due to lack of genotyped ancestry SNPs "
                  << "(at least " << minAncSnps << " ancestry SNPs are needed).\n\n";
-                return 0;
+                return 1;
             }
         }
         else if (fileType == GenoDatasetType::IS_PLINK) {
@@ -233,14 +233,14 @@ int main(int argc, char* argv[])
                 bedGeno->SelectFamSampleIds(stSmpNo, numChkSmps);
                 bool hasErr = bedGeno->ReadGenotypesFromBedFile();
                 
-                if (hasErr) return 0;
+                if (hasErr) return 1;
                 // bedGeno->ShowSummary();
                 
                 smpGenoAnc->SetSnpGenoData(&bedGeno->ancSnpSnpIds, &bedGeno->ancSnpSmpGenos);
             }
             else {
                 cout << "Ancestry inference not done due to lack of genotyped ancestry SNPs.\n\n";
-                return 0;
+                return 1;
             }
         }
         
@@ -266,8 +266,8 @@ int main(int argc, char* argv[])
     
         //// Append results to the output file
         bool isAppend = round == 0 ? false : true;
-        smpGenoAnc->SaveAncestryResults(outputFile, isAppend);
-    
+        if (smpGenoAnc->SaveAncestryResults(outputFile, isAppend) < 0) return 1;
+
         if (hasVcfGeno) delete vcfGeno;
         if (hasBedGeno) delete bedGeno;
         
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
     gettimeofday(&t2, NULL);
     ShowTimeDiff(t1, t2);
 
-    return 1;
+    return 0;
 }
 
 string GetExecutablePath()
